@@ -1,336 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WALLIE | FairlyEven Hospitality Podcast</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background: #020b12;
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      background:#020b12; color:#fff;
+      font-family:'DM Sans',sans-serif;
+      min-height:100vh; overflow:hidden;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
     }
-
-    /* Ocean particle canvas */
-    #particles {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
-
+    #particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
     .wrapper {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 960px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
+      position:relative; z-index:1;
+      width:100%; max-width:960px;
+      padding:24px; display:flex;
+      flex-direction:column; align-items:center; gap:20px;
     }
-
-    /* Header */
-    .header {
-      text-align: center;
-    }
-    .header .logo {
-      font-size: 13px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #00d4ff;
-      opacity: 0.8;
-      margin-bottom: 6px;
-    }
-    .header h1 {
-      font-size: 26px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #00d4ff, #ffffff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    /* Status pill */
+    .header { text-align:center; }
+    .header .logo { font-size:13px; letter-spacing:3px; text-transform:uppercase; color:#00d4ff; opacity:.8; margin-bottom:6px; }
+    .header h1 { font-size:26px; font-weight:700; background:linear-gradient(135deg,#00d4ff,#fff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0, 212, 255, 0.08);
-      border: 1px solid rgba(0, 212, 255, 0.2);
-      border-radius: 999px;
-      padding: 6px 16px;
-      font-size: 13px;
-      color: #00d4ff;
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(0,212,255,.08); border:1px solid rgba(0,212,255,.2);
+      border-radius:999px; padding:6px 16px; font-size:13px; color:#00d4ff;
     }
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #00d4ff;
-      animation: pulse 2s infinite;
-    }
-    .status-dot.recording { background: #ff4444; }
-    .status-dot.idle { background: #555; animation: none; }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
-    }
+    .status-dot { width:8px; height:8px; border-radius:50%; background:#00d4ff; animation:pulse 2s infinite; }
+    .status-dot.recording { background:#ff4444; }
+    .status-dot.idle { background:#555; animation:none; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
 
-    /* Main video area */
-    .video-area {
-      display: flex;
-      gap: 16px;
-      width: 100%;
-      align-items: flex-start;
-    }
+    .video-area { display:flex; gap:16px; width:100%; align-items:flex-start; }
 
     .wallie-container {
-      flex: 1;
-      position: relative;
-      background: rgba(0, 212, 255, 0.04);
-      border: 1px solid rgba(0, 212, 255, 0.15);
-      border-radius: 20px;
-      overflow: hidden;
-      aspect-ratio: 9/16;
-      max-height: 480px;
+      flex:1; position:relative;
+      background:rgba(0,212,255,.04);
+      border:1px solid rgba(0,212,255,.15);
+      border-radius:20px; overflow:hidden;
+      aspect-ratio:9/16; max-height:480px;
     }
-
-    #wallieVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
+    #wallieVideo { width:100%; height:100%; object-fit:cover; display:block; }
     .wallie-label {
-      position: absolute;
-      bottom: 12px;
-      left: 12px;
-      background: rgba(2, 11, 18, 0.8);
-      border: 1px solid rgba(0, 212, 255, 0.3);
-      border-radius: 8px;
-      padding: 4px 10px;
-      font-size: 12px;
-      color: #00d4ff;
-      backdrop-filter: blur(8px);
+      position:absolute; bottom:12px; left:12px;
+      background:rgba(2,11,18,.8); border:1px solid rgba(0,212,255,.3);
+      border-radius:8px; padding:4px 10px; font-size:12px; color:#00d4ff;
+      backdrop-filter:blur(8px);
     }
-
-    /* Loading overlay */
     .loading-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(2, 11, 18, 0.95);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      transition: opacity 0.5s;
+      position:absolute; inset:0; background:rgba(2,11,18,.95);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:16px; transition:opacity .5s;
     }
-    .loading-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .orca-emoji { font-size: 48px; animation: bob 2s ease-in-out infinite; }
-    @keyframes bob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    .loading-text {
-      font-size: 15px;
-      color: rgba(255,255,255,0.7);
-    }
-    .loading-bar {
-      width: 160px;
-      height: 3px;
-      background: rgba(0, 212, 255, 0.15);
-      border-radius: 99px;
-      overflow: hidden;
-    }
-    .loading-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: #00d4ff;
-      border-radius: 99px;
-      transition: width 0.4s ease;
-    }
+    .loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .orca-emoji { font-size:48px; animation:bob 2s ease-in-out infinite; }
+    @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .loading-text { font-size:15px; color:rgba(255,255,255,.7); }
+    .loading-bar { width:160px; height:3px; background:rgba(0,212,255,.15); border-radius:99px; overflow:hidden; }
+    .loading-bar-fill { height:100%; width:0%; background:#00d4ff; border-radius:99px; transition:width .4s ease; }
 
-    /* Right panel - guest + controls */
-    .right-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 220px;
-      flex-shrink: 0;
-    }
-
-    .guest-container {
-      position: relative;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      overflow: hidden;
-      aspect-ratio: 4/3;
-    }
-    #guestVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1);
-    }
-    .guest-label {
-      position: absolute;
-      bottom: 8px;
-      left: 8px;
-      background: rgba(2,11,18,0.8);
-      border-radius: 6px;
-      padding: 3px 8px;
-      font-size: 11px;
-      color: rgba(255,255,255,0.6);
-    }
-
-    /* Controls */
-    .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .btn-start {
-      background: linear-gradient(135deg, #00d4ff, #0077aa);
-      color: #fff;
-    }
-    .btn-start:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,212,255,0.3); }
-
-    .btn-end {
-      background: rgba(255, 60, 60, 0.1);
-      border: 1px solid rgba(255, 60, 60, 0.3);
-      color: #ff6b6b;
-    }
-    .btn-end:hover:not(:disabled) { background: rgba(255, 60, 60, 0.2); }
-
-    .btn-mute {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.7);
-    }
-    .btn-mute:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
-
-    /* Recording indicator */
-    .rec-badge {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,60,60,0.1);
-      border: 1px solid rgba(255,60,60,0.25);
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 12px;
-      color: #ff6b6b;
-    }
-    .rec-badge.visible { display: flex; }
-
-    /* WALLIE speaking indicator */
     .speaking-bars {
-      display: none;
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      gap: 3px;
-      align-items: flex-end;
-      height: 20px;
+      display:none; position:absolute; top:12px; right:12px;
+      gap:3px; align-items:flex-end; height:20px;
     }
-    .speaking-bars.active { display: flex; }
-    .bar {
-      width: 3px;
-      background: #00d4ff;
-      border-radius: 2px;
-      animation: barAnim 0.8s ease-in-out infinite;
-    }
-    .bar:nth-child(1) { height: 8px; animation-delay: 0s; }
-    .bar:nth-child(2) { height: 14px; animation-delay: 0.1s; }
-    .bar:nth-child(3) { height: 20px; animation-delay: 0.2s; }
-    .bar:nth-child(4) { height: 12px; animation-delay: 0.3s; }
-    @keyframes barAnim {
-      0%, 100% { transform: scaleY(0.4); }
-      50% { transform: scaleY(1); }
-    }
+    .speaking-bars.active { display:flex; }
+    .bar { width:3px; background:#00d4ff; border-radius:2px; animation:barAnim .8s ease-in-out infinite; }
+    .bar:nth-child(1){height:8px;animation-delay:0s}
+    .bar:nth-child(2){height:14px;animation-delay:.1s}
+    .bar:nth-child(3){height:20px;animation-delay:.2s}
+    .bar:nth-child(4){height:12px;animation-delay:.3s}
+    @keyframes barAnim { 0%,100%{transform:scaleY(.4)} 50%{transform:scaleY(1)} }
 
-    /* Upload progress overlay */
+    .right-panel { display:flex; flex-direction:column; gap:12px; width:220px; flex-shrink:0; }
+    .guest-container {
+      position:relative; background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px; overflow:hidden; aspect-ratio:4/3;
+    }
+    #guestVideo { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
+    .guest-label {
+      position:absolute; bottom:8px; left:8px;
+      background:rgba(2,11,18,.8); border-radius:6px;
+      padding:3px 8px; font-size:11px; color:rgba(255,255,255,.6);
+    }
+    .controls { display:flex; flex-direction:column; gap:8px; }
+    .btn {
+      width:100%; padding:12px; border-radius:12px; border:none;
+      cursor:pointer; font-size:14px; font-weight:600;
+      transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn:disabled { opacity:.4; cursor:not-allowed; }
+    .btn-start { background:linear-gradient(135deg,#00d4ff,#0077aa); color:#fff; }
+    .btn-start:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,212,255,.3); }
+    .btn-end { background:rgba(255,60,60,.1); border:1px solid rgba(255,60,60,.3); color:#ff6b6b; }
+    .btn-end:hover:not(:disabled) { background:rgba(255,60,60,.2); }
+    .btn-mute { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.7); }
+    .btn-mute:hover:not(:disabled) { background:rgba(255,255,255,.08); }
+    .rec-badge {
+      display:none; align-items:center; gap:6px;
+      background:rgba(255,60,60,.1); border:1px solid rgba(255,60,60,.25);
+      border-radius:8px; padding:8px 12px; font-size:12px; color:#ff6b6b;
+    }
+    .rec-badge.visible { display:flex; }
+
     #uploadOverlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(2,11,18,0.95);
-      z-index: 100;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
+      display:none; position:fixed; inset:0;
+      background:rgba(2,11,18,.95); z-index:100;
+      flex-direction:column; align-items:center; justify-content:center; gap:20px;
     }
-    #uploadOverlay.visible { display: flex; }
-    .upload-text { font-size: 18px; font-weight: 600; color: #fff; }
-    .upload-sub { font-size: 14px; color: rgba(255,255,255,0.5); text-align: center; max-width: 320px; }
-    .upload-spinner {
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(0,212,255,0.2);
-      border-top-color: #00d4ff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    #uploadOverlay.visible { display:flex; }
+    .upload-text { font-size:18px; font-weight:600; }
+    .upload-sub { font-size:14px; color:rgba(255,255,255,.5); text-align:center; max-width:320px; }
+    .upload-spinner { width:48px; height:48px; border:3px solid rgba(0,212,255,.2); border-top-color:#00d4ff; border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
 
-    /* Done screen */
     #doneScreen {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(2,11,18,0.97);
-      z-index: 100;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      text-align: center;
-      padding: 32px;
+      display:none; position:fixed; inset:0;
+      background:rgba(2,11,18,.97); z-index:100;
+      flex-direction:column; align-items:center; justify-content:center;
+      gap:16px; text-align:center; padding:32px;
     }
-    #doneScreen.visible { display: flex; }
-    .done-emoji { font-size: 64px; }
-    .done-title { font-size: 28px; font-weight: 700; color: #fff; }
-    .done-sub { font-size: 15px; color: rgba(255,255,255,0.5); max-width: 360px; line-height: 1.6; }
+    #doneScreen.visible { display:flex; }
+    .done-emoji { font-size:64px; }
+    .done-title { font-size:28px; font-weight:700; }
+    .done-sub { font-size:15px; color:rgba(255,255,255,.5); max-width:360px; line-height:1.6; }
 
-    @media (max-width: 640px) {
-      .video-area { flex-direction: column; }
-      .right-panel { width: 100%; flex-direction: row; flex-wrap: wrap; }
-      .guest-container { flex: 1; min-width: 140px; }
-      .controls { flex: 1; min-width: 140px; }
-      .wallie-container { max-height: 360px; }
+    @media(max-width:640px) {
+      .video-area { flex-direction:column; }
+      .right-panel { width:100%; flex-direction:row; flex-wrap:wrap; }
+      .guest-container { flex:1; min-width:140px; }
+      .controls { flex:1; min-width:140px; }
+      .wallie-container { max-height:360px; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
@@ -342,101 +144,82 @@
 <div class="wrapper">
   <div class="header">
     <div class="logo">FairlyEven Hospitality Podcast</div>
-    <h1>🐋 Live with WALLIE</h1>
+    <h1>🎙️ Live with WALLIE</h1>
   </div>
-
   <div class="status-pill">
     <div class="status-dot idle" id="statusDot"></div>
     <span id="statusText">Connecting to WALLIE...</span>
   </div>
-
   <div class="video-area">
-    <!-- WALLIE -->
     <div class="wallie-container">
       <video id="wallieVideo" autoplay playsinline></video>
-      <div class="wallie-label">🐋 WALLIE — Host</div>
+      <audio id="wallieAudio" autoplay></audio>
+      <div class="wallie-label">🎙️ WALLIE — Host</div>
       <div class="speaking-bars" id="speakingBars">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div>
       </div>
       <div class="loading-overlay" id="loadingOverlay">
-        <div class="orca-emoji">🐋</div>
+        <div class="orca-emoji">🎙️</div>
         <div class="loading-text" id="loadingText">Setting up your interview...</div>
         <div class="loading-bar"><div class="loading-bar-fill" id="loadingFill"></div></div>
       </div>
     </div>
-
-    <!-- Right panel -->
     <div class="right-panel">
       <div class="guest-container">
         <video id="guestVideo" autoplay playsinline muted></video>
         <div class="guest-label" id="guestLabel">You</div>
       </div>
-
       <div class="controls">
         <button class="btn btn-start" id="btnStart" disabled>🎙️ Start Interview</button>
-        <button class="btn btn-mute" id="btnMute" disabled>🔇 Mute</button>
-        <button class="btn btn-end" id="btnEnd" disabled>⏹ End Interview</button>
+        <button class="btn btn-mute"  id="btnMute"  disabled>🔇 Mute</button>
+        <button class="btn btn-end"   id="btnEnd"   disabled>⏹ End Interview</button>
         <div class="rec-badge" id="recBadge">
-          <div class="status-dot recording"></div>
-          REC
+          <div class="status-dot recording"></div> REC
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Upload overlay -->
 <div id="uploadOverlay">
   <div class="upload-spinner"></div>
   <div class="upload-text">Saving your episode...</div>
-  <div class="upload-sub">Please don't close this tab. Your recording is being saved to FairlyEven.</div>
+  <div class="upload-sub">Please don't close this tab. Your recording is being uploaded to FairlyEven.</div>
 </div>
 
-<!-- Done screen -->
 <div id="doneScreen">
   <div class="done-emoji">🌊</div>
   <div class="done-title">You're a star!</div>
-  <div class="done-sub">Thank you for being on the FairlyEven Hospitality Podcast with WALLIE. Your episode will be live soon at fairlyeven.com — check your phone for a message from us!</div>
+  <div class="done-sub">Thank you for being on the FairlyEven Hospitality Podcast. Your episode will be live soon at fairlyeven.com — check your phone for a message from us!</div>
 </div>
 
-<!-- HeyGen Streaming SDK -->
-<script src="https://unpkg.com/@heygen/streaming-avatar@latest/dist/index.umd.js"></script>
+<!-- LiveAvatar Web SDK -->
+<script src="https://unpkg.com/@heygen/liveavatar-web-sdk@latest/dist/index.umd.js"></script>
 
 <script>
-// ─────────────────────────────────────────────
-// CONFIG — n8n will generate the page URL with these params
-// ─────────────────────────────────────────────
-const params = new URLSearchParams(window.location.search);
-const SESSION_ID     = params.get('session_id')    || '';
-const ACCESS_TOKEN   = params.get('access_token')  || '';
-const REALTIME_EP    = params.get('realtime_ep')   || '';
-const GUEST_NAME     = params.get('name')          || 'Guest';
-const PHONE_SAFE     = params.get('phone_safe')    || 'unknown';
-const DATE_SAFE      = params.get('date')          || new Date().toISOString().split('T')[0];
+// ─── URL PARAMS (injected by n8n) ───────────────────────────────────────────
+const p            = new URLSearchParams(window.location.search);
+const SESSION_ID   = p.get('session_id')    || '';
+const SESSION_TOKEN= p.get('session_token') || '';
+const LIVEKIT_URL  = p.get('livekit_url')   || '';
+const LIVEKIT_TOKEN= p.get('livekit_token') || '';
+const GUEST_NAME   = decodeURIComponent(p.get('name') || 'Guest');
+const PHONE_SAFE   = p.get('phone_safe')    || 'unknown';
+const DATE_SAFE    = p.get('date')          || new Date().toISOString().split('T')[0];
 
-// n8n webhook that receives the recording blob
 const RECORDING_WEBHOOK = 'https://n8n.srv1144276.hstgr.cloud/webhook/wallie-recording-upload';
 
-// Knowledge base ID — "podcast host" KB
-const KNOWLEDGE_BASE_ID = '9acb8db304994edba55cad4a9bf71473';
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let liveAvatarClient = null;
+let guestStream      = null;
+let mediaRecorder    = null;
+let recordedChunks   = [];
+let isMuted          = false;
 
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-let avatar = null;
-let mediaRecorder = null;
-let recordedChunks = [];
-let guestStream = null;
-let isMuted = false;
-let sessionStarted = false;
-
-// ─────────────────────────────────────────────
-// ELEMENTS
-// ─────────────────────────────────────────────
+// ─── ELEMENTS ────────────────────────────────────────────────────────────────
 const wallieVideo    = document.getElementById('wallieVideo');
+const wallieAudio    = document.getElementById('wallieAudio');
 const guestVideo     = document.getElementById('guestVideo');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const loadingText    = document.getElementById('loadingText');
@@ -452,186 +235,153 @@ const guestLabel     = document.getElementById('guestLabel');
 const uploadOverlay  = document.getElementById('uploadOverlay');
 const doneScreen     = document.getElementById('doneScreen');
 
-// ─────────────────────────────────────────────
-// PARTICLES
-// ─────────────────────────────────────────────
-(function() {
+// ─── PARTICLES ───────────────────────────────────────────────────────────────
+(function(){
   const canvas = document.getElementById('particles');
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-
-  function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  for (let i = 0; i < 60; i++) {
-    particles.push({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      r: Math.random() * 1.5 + 0.5,
-      dx: (Math.random() - 0.5) * 0.3,
-      dy: (Math.random() - 0.5) * 0.3,
-      o: Math.random() * 0.5 + 0.1
-    });
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0, 212, 255, ${p.o})`;
-      ctx.fill();
-      p.x += p.dx;
-      p.y += p.dy;
-      if (p.x < 0 || p.x > W) p.dx *= -1;
-      if (p.y < 0 || p.y > H) p.dy *= -1;
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
+  const ctx    = canvas.getContext('2d');
+  let W, H;
+  const pts = Array.from({length:60}, ()=>({
+    x: Math.random()*window.innerWidth,
+    y: Math.random()*window.innerHeight,
+    r: Math.random()*1.5+.5,
+    dx:(Math.random()-.5)*.3,
+    dy:(Math.random()-.5)*.3,
+    o: Math.random()*.5+.1
+  }));
+  function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+  resize(); window.addEventListener('resize',resize);
+  (function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,212,255,${p.o})`; ctx.fill();
+      p.x+=p.dx; p.y+=p.dy;
+      if(p.x<0||p.x>W) p.dx*=-1;
+      if(p.y<0||p.y>H) p.dy*=-1;
+    }); requestAnimationFrame(draw);
+  })();
 })();
 
-// ─────────────────────────────────────────────
-// SET GUEST NAME
-// ─────────────────────────────────────────────
-guestLabel.textContent = GUEST_NAME.split(' ')[0] || 'You';
-
-// ─────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────
-function setStatus(dot, text) {
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function setStatus(dot, text){
   statusDot.className = 'status-dot ' + dot;
   statusText.textContent = text;
 }
-
-function setLoading(text, pct) {
+function setLoading(text, pct){
   loadingText.textContent = text;
   loadingFill.style.width = pct + '%';
 }
+guestLabel.textContent = GUEST_NAME.split(' ')[0] || 'You';
 
-// ─────────────────────────────────────────────
-// INIT GUEST CAMERA
-// ─────────────────────────────────────────────
-async function initCamera() {
+// ─── CAMERA ──────────────────────────────────────────────────────────────────
+async function initCamera(){
   try {
-    guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    guestStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
     guestVideo.srcObject = guestStream;
-  } catch(e) {
-    // Camera denied — audio-only fallback
-    try {
-      guestStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
-    } catch(e2) {
-      console.warn('No mic access', e2);
-    }
+  } catch(e){
+    try { guestStream = await navigator.mediaDevices.getUserMedia({ video:false, audio:true }); }
+    catch(e2){ console.warn('No mic/camera', e2); }
   }
 }
 
-// ─────────────────────────────────────────────
-// INIT HEYGEN SESSION
-// ─────────────────────────────────────────────
-async function initHeyGen() {
+// ─── LIVEAVATAR SDK INIT ─────────────────────────────────────────────────────
+async function initLiveAvatar(){
   setLoading('Loading WALLIE...', 20);
 
-  if (!SESSION_ID || !ACCESS_TOKEN) {
+  if (!LIVEKIT_URL || !LIVEKIT_TOKEN) {
     setLoading('Missing session credentials. Please use the link from your SMS.', 0);
     return;
   }
 
   try {
-    // StreamingAvatar is the UMD global from the SDK
-    const { StreamingAvatar, AvatarQuality, StreamingEvents } = window.StreamingAvatarSDK || window.HeyGen || window;
+    // SDK is LiveAvatarWebSDK or similar UMD global — check what's available
+    const SDK = window.LiveAvatarWebSDK || window.LiveAvatar || window.HeyGenLiveAvatar;
 
-    avatar = new StreamingAvatar({ token: ACCESS_TOKEN });
+    if (!SDK) {
+      throw new Error('LiveAvatar SDK not loaded. Check CDN.');
+    }
 
-    avatar.on(StreamingEvents.STREAM_READY, (e) => {
+    setLoading('Connecting to session...', 40);
+
+    // Create client and connect to LiveKit room
+    liveAvatarClient = new SDK.LiveAvatarClient({
+      livekitUrl:   LIVEKIT_URL,
+      livekitToken: LIVEKIT_TOKEN,
+    });
+
+    // Video track received → attach to video element
+    liveAvatarClient.on('avatarVideoTrack', (track) => {
+      track.attach(wallieVideo);
       setLoading('WALLIE is ready!', 100);
-      wallieVideo.srcObject = e.detail;
-      setTimeout(() => loadingOverlay.classList.add('hidden'), 800);
+      setTimeout(()=> loadingOverlay.classList.add('hidden'), 800);
       setStatus('', 'Ready — click Start Interview');
       btnStart.disabled = false;
     });
 
-    avatar.on(StreamingEvents.STREAM_DISCONNECTED, () => {
+    // Audio track received → attach to audio element
+    liveAvatarClient.on('avatarAudioTrack', (track) => {
+      track.attach(wallieAudio);
+    });
+
+    liveAvatarClient.on('avatarStartTalking', () => {
+      speakingBars.classList.add('active');
+    });
+    liveAvatarClient.on('avatarStopTalking', () => {
+      speakingBars.classList.remove('active');
+    });
+    liveAvatarClient.on('disconnected', () => {
       setStatus('idle', 'Disconnected');
     });
 
-    avatar.on(StreamingEvents.AVATAR_START_TALKING, () => {
-      speakingBars.classList.add('active');
-    });
+    setLoading('Joining interview room...', 70);
+    await liveAvatarClient.connect();
 
-    avatar.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
-      speakingBars.classList.remove('active');
-    });
-
-    setLoading('Connecting to session...', 50);
-
-    await avatar.startSession({
-      sessionId: SESSION_ID,
-      token: ACCESS_TOKEN,
-      quality: AvatarQuality.High,
-      knowledgeBase: KNOWLEDGE_BASE_ID
-    });
-
-    setLoading('Starting WALLIE...', 80);
-
-  } catch(err) {
-    console.error('HeyGen init error:', err);
+  } catch(err){
+    console.error('LiveAvatar init error:', err);
     setLoading('Could not connect to WALLIE. Please refresh or contact support.', 0);
   }
 }
 
-// ─────────────────────────────────────────────
-// RECORDING — captures WALLIE + guest audio
-// ─────────────────────────────────────────────
-function startRecording() {
+// ─── RECORDING ───────────────────────────────────────────────────────────────
+function startRecording(){
   try {
     const audioCtx = new AudioContext();
-    const dest = audioCtx.createMediaStreamDestination();
+    const dest     = audioCtx.createMediaStreamDestination();
 
-    // Mix guest mic
-    if (guestStream) {
-      const guestSource = audioCtx.createMediaStreamSource(guestStream);
-      guestSource.connect(dest);
+    if (guestStream){
+      audioCtx.createMediaStreamSource(guestStream).connect(dest);
+    }
+    // Capture WALLIE audio from the audio element
+    if (wallieAudio.srcObject){
+      audioCtx.createMediaStreamSource(wallieAudio.srcObject).connect(dest);
     }
 
-    // Mix WALLIE audio from video element
-    if (wallieVideo.srcObject) {
-      const wallieSource = audioCtx.createMediaStreamSource(wallieVideo.srcObject);
-      wallieSource.connect(dest);
-    }
-
-    // Also capture WALLIE video track
-    const videoTracks = wallieVideo.srcObject ? wallieVideo.srcObject.getVideoTracks() : [];
-    const combinedStream = new MediaStream([...videoTracks, ...dest.stream.getAudioTracks()]);
+    const videoTracks = (wallieVideo.srcObject || new MediaStream()).getVideoTracks();
+    const combined    = new MediaStream([...videoTracks, ...dest.stream.getAudioTracks()]);
 
     recordedChunks = [];
-    mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp8,opus' });
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder  = new MediaRecorder(combined, { mimeType:'video/webm;codecs=vp8,opus' });
+    mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
     mediaRecorder.start(1000);
-
     recBadge.classList.add('visible');
-  } catch(err) {
+  } catch(err){
     console.error('Recording error:', err);
-    // Fallback — audio only
+    // Fallback audio-only
     try {
-      const audioOnlyStream = guestStream || new MediaStream();
-      mediaRecorder = new MediaRecorder(audioOnlyStream);
-      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      const s = guestStream || new MediaStream();
+      mediaRecorder = new MediaRecorder(s);
+      mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
       mediaRecorder.start(1000);
       recBadge.classList.add('visible');
-    } catch(e2) { console.warn('Could not start fallback recording', e2); }
+    } catch(e2){ console.warn('Fallback recording failed', e2); }
   }
 }
 
-function stopRecording() {
+function stopRecording(){
   return new Promise(resolve => {
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') { resolve(null); return; }
+    if (!mediaRecorder || mediaRecorder.state==='inactive'){ resolve(null); return; }
     mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const blob = new Blob(recordedChunks, {type:'video/webm'});
       resolve(blob);
     };
     mediaRecorder.stop();
@@ -639,50 +389,29 @@ function stopRecording() {
   });
 }
 
-// ─────────────────────────────────────────────
-// UPLOAD TO N8N
-// ─────────────────────────────────────────────
-async function uploadRecording(blob) {
+// ─── UPLOAD ───────────────────────────────────────────────────────────────────
+async function uploadRecording(blob){
   uploadOverlay.classList.add('visible');
-
   const filename = `${PHONE_SAFE}_${DATE_SAFE}_wallie.webm`;
-  const formData = new FormData();
-  formData.append('recording', blob, filename);
-  formData.append('phone_safe', PHONE_SAFE);
-  formData.append('date', DATE_SAFE);
-  formData.append('guest_name', GUEST_NAME);
-  formData.append('filename', filename);
-
+  const fd = new FormData();
+  fd.append('recording',  blob, filename);
+  fd.append('phone_safe', PHONE_SAFE);
+  fd.append('date',       DATE_SAFE);
+  fd.append('guest_name', GUEST_NAME);
+  fd.append('filename',   filename);
   try {
-    await fetch(RECORDING_WEBHOOK, { method: 'POST', body: formData });
-  } catch(err) {
-    console.error('Upload failed:', err);
-    // Still show done screen — n8n may retry
-  }
-
+    await fetch(RECORDING_WEBHOOK, { method:'POST', body:fd });
+  } catch(err){ console.error('Upload failed:', err); }
   uploadOverlay.classList.remove('visible');
   doneScreen.classList.add('visible');
 }
 
-// ─────────────────────────────────────────────
-// BUTTON HANDLERS
-// ─────────────────────────────────────────────
+// ─── BUTTONS ─────────────────────────────────────────────────────────────────
 btnStart.addEventListener('click', async () => {
   btnStart.disabled = true;
-  btnMute.disabled = false;
-  btnEnd.disabled = false;
-  sessionStarted = true;
-
+  btnMute.disabled  = false;
+  btnEnd.disabled   = false;
   setStatus('', 'Interview live 🎙️');
-
-  // WALLIE opening line
-  try {
-    await avatar.speak({
-      text: `Hey ${GUEST_NAME.split(' ')[0]}! Welcome to the FairlyEven Hospitality Podcast! I'm WALLIE, your host today. I'm so excited to chat with you! Tell me — what first inspired you to join the hospitality industry?`,
-      task_type: 'talk'
-    });
-  } catch(e) { console.warn('Speak error', e); }
-
   startRecording();
 });
 
@@ -694,42 +423,23 @@ btnMute.addEventListener('click', () => {
 
 btnEnd.addEventListener('click', async () => {
   if (!confirm('End the interview? Your recording will be saved.')) return;
-
-  btnEnd.disabled = true;
-  btnStart.disabled = true;
-  btnMute.disabled = true;
-
+  btnEnd.disabled = btnStart.disabled = btnMute.disabled = true;
   setStatus('idle', 'Ending session...');
 
-  // WALLIE closing line
-  try {
-    await avatar.speak({
-      text: `Thank you so much for joining us today! It's been an absolute pleasure getting to know you. Your episode will be live soon on fairlyeven.com — stay tuned! 🌊`,
-      task_type: 'talk'
-    });
-    await new Promise(r => setTimeout(r, 6000));
-  } catch(e) { console.warn('Closing speak error', e); }
-
-  // Stop everything
-  try { await avatar.stopAvatar(); } catch(e) {}
+  try { await liveAvatarClient?.disconnect(); } catch(e){}
   if (guestStream) guestStream.getTracks().forEach(t => t.stop());
 
   const blob = await stopRecording();
-  if (blob && blob.size > 0) {
-    await uploadRecording(blob);
-  } else {
-    doneScreen.classList.add('visible');
-  }
+  if (blob && blob.size > 0) { await uploadRecording(blob); }
+  else { doneScreen.classList.add('visible'); }
 });
 
-// ─────────────────────────────────────────────
-// BOOT
-// ─────────────────────────────────────────────
+// ─── BOOT ────────────────────────────────────────────────────────────────────
 (async () => {
   setStatus('idle', 'Starting camera...');
   setLoading('Starting camera...', 10);
   await initCamera();
-  await initHeyGen();
+  await initLiveAvatar();
 })();
 </script>
 </body>
