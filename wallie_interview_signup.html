@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Be Featured on the FairlyEven Podcast 🐋</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --black: #080c0f;
+      --deep: #0d1419;
+      --card: #111820;
+      --border: #1e2d3a;
+      --teal: #00c8b4;
+      --teal2: #00e5cc;
+      --white: #f0f4f8;
+      --muted: #6a8a99;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated ocean background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,200,180,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(0,150,200,0.07) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Wave lines */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 60px,
+        rgba(0,200,180,0.025) 60px,
+        rgba(0,200,180,0.025) 61px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* Header */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 12px var(--teal);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .brand-name {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--teal);
+    }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 48px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.1s forwards;
+    }
+
+    .headline {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 10vw, 80px);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.2s forwards;
+    }
+
+    .headline span {
+      color: var(--teal);
+      position: relative;
+    }
+
+    .headline span::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--teal);
+      opacity: 0.4;
+    }
+
+    .subhead {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 440px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.3s forwards;
+    }
+
+    .subhead strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    /* Wallie badge */
+    .wallie-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 8px 16px 8px 8px;
+      margin: 28px 0;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.4s forwards;
+    }
+
+    .wallie-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1a2f3a, #0d1e28);
+      border: 2px solid var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .wallie-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--white);
+    }
+
+    .wallie-text span {
+      display: block;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--muted);
+    }
+
+    /* Form card */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.5s forwards;
+    }
+
+    .form-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--white);
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--deep);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+    }
+
+    input::placeholder { color: #344d5c; }
+
+    input:focus, select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(0,200,180,0.1);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236a8a99' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+
+    select option { background: var(--deep); }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%;
+      margin-top: 24px;
+      padding: 15px;
+      background: var(--teal);
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--black);
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.15);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,200,180,0.3); }
+    .submit-btn:hover::after { opacity: 1; }
+    .submit-btn:active { transform: translateY(0); }
+
+    .submit-btn.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    /* Success state */
+    .success-msg {
+      display: none;
+      text-align: center;
+      padding: 32px 16px;
+    }
+
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: pop 0.4s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .success-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      color: var(--teal);
+      margin-bottom: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .success-text {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Error msg */
+    .error-msg {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: rgba(255,60,60,0.1);
+      border: 1px solid rgba(255,60,60,0.2);
+      border-radius: 6px;
+      font-size: 13px;
+      color: #ff6b6b;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.6s forwards;
+    }
+
+    .footer a { color: var(--teal); text-decoration: none; }
+
+    /* Perks row */
+    .perks {
+      display: flex;
+      gap: 20px;
+      margin: 32px 0;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.45s forwards;
+    }
+
+    .perk {
+      flex: 1;
+      background: rgba(0,200,180,0.04);
+      border: 1px solid rgba(0,200,180,0.12);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .perk-icon { font-size: 20px; margin-bottom: 6px; }
+
+    .perk-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--teal);
+      margin-bottom: 3px;
+    }
+
+    .perk-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+      .perks { flex-direction: column; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <div class="brand-name">FairlyEven Hospitality Podcast</div>
+    </div>
+
+    <div class="hero">
+      <div class="eyebrow">🎙️ Now accepting guests</div>
+      <h1 class="headline">GET <span>FEATURED</span><br>ON THE POD</h1>
+      <p class="subhead">
+        Share your story with the world. WALLIE interviews <strong>hospitality workers, chefs, restaurant owners & industry pros</strong> — and publishes your episode across our network.
+      </p>
+
+      <div class="wallie-badge">
+        <div class="wallie-avatar">🐋</div>
+        <div class="wallie-text">
+          Hosted by WALLIE
+          <span>FairlyEven's AI Podcast Host</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="perks">
+      <div class="perk">
+        <div class="perk-icon">🎬</div>
+        <div class="perk-label">Get Published</div>
+        <div class="perk-desc">Your episode live on fairlyeven.com</div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">📱</div>
+        <div class="perk-label">Short Clips</div>
+        <div class="perk-desc">Shareable content for your socials</div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">🌊</div>
+        <div class="perk-label">WaveClosers</div>
+        <div class="perk-desc">Exposure to our full community</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-title">Apply for Your Interview</div>
+
+      <div id="formContent">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="firstName" placeholder="Alex" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="lastName" placeholder="Johnson" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" placeholder="+1 (555) 000-0000" />
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="alex@restaurant.com" />
+        </div>
+
+        <div class="form-group">
+          <label>Your Role in Hospitality</label>
+          <select id="role">
+            <option value="" disabled selected>Select your role...</option>
+            <option value="chef">Chef / Cook</option>
+            <option value="restaurant_owner">Restaurant Owner</option>
+            <option value="restaurant_manager">Restaurant Manager</option>
+            <option value="hospitality_worker">Hospitality Worker</option>
+            <option value="hotel_staff">Hotel Staff</option>
+            <option value="food_influencer">Food Influencer / Creator</option>
+            <option value="bartender">Bartender / Mixologist</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+          Apply to Be Featured 🐋
+        </button>
+
+        <div class="error-msg" id="errorMsg"></div>
+      </div>
+
+      <div class="success-msg" id="successMsg">
+        <div class="success-icon">🐋</div>
+        <div class="success-title">You're In!</div>
+        <div class="success-text">
+          WALLIE will be in touch shortly with your interview link.<br><br>
+          Check your phone for a text from us!
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      A <a href="https://waveclosers.com" target="_blank">WaveClosers</a> &amp;
+      <a href="https://fairlyeven.com" target="_blank">FairlyEven</a> production
+    </div>
+
+  </div>
+
+  <script>
+    async function submitForm() {
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName  = document.getElementById('lastName').value.trim();
+      const phone     = document.getElementById('phone').value.trim();
+      const email     = document.getElementById('email').value.trim();
+      const role      = document.getElementById('role').value;
+      const errorMsg  = document.getElementById('errorMsg');
+      const submitBtn = document.getElementById('submitBtn');
+
+      errorMsg.style.display = 'none';
+
+      if (!firstName || !lastName || !phone || !role) {
+        errorMsg.textContent = 'Please fill in all required fields.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      submitBtn.textContent = 'Sending...';
+      submitBtn.classList.add('loading');
+
+      const payload = {
+        name: firstName + ' ' + lastName,
+        firstName,
+        lastName,
+        phone,
+        email,
+        role,
+        source: 'podcast_landing_page',
+        submittedAt: new Date().toISOString()
+      };
+
+      try {
+        const res = await fetch(
+          'https://n8n.srv1144276.hstgr.cloud/webhook/wallie-interview-trigger',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }
+        );
+
+        if (res.ok) {
+          document.getElementById('formContent').style.display = 'none';
+          document.getElementById('successMsg').style.display = 'block';
+        } else {
+          throw new Error('Server error');
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Something went wrong. Please try again.';
+        errorMsg.style.display = 'block';
+        submitBtn.textContent = 'Apply to Be Featured 🐋';
+        submitBtn.classList.remove('loading');
+      }
+    }
+
+    // Enter key submits
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitForm();
+    });
+  </script>
+</body>
+</html>
