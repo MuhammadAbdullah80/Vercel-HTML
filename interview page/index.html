@@ -1,482 +1,471 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WALLIE | FairlyEven Hospitality Podcast</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
-
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{background:#020b12;color:#fff;font-family:'DM Sans',sans-serif;min-height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    body{background:#020b12;color:#fff;font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
     #particles{position:fixed;inset:0;z-index:0;pointer-events:none}
-    .wrapper{position:relative;z-index:1;width:100%;max-width:1100px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:20px}
+    .wrapper{position:relative;z-index:1;width:100%;max-width:1100px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px}
     .header{text-align:center}
-    .logo{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#00d4ff;opacity:.8;margin-bottom:6px}
-    h1{font-size:26px;font-weight:700;background:linear-gradient(135deg,#00d4ff,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .status-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:999px;padding:6px 16px;font-size:13px;color:#00d4ff}
+    .logo{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#00d4ff;opacity:.8;margin-bottom:4px}
+    h1{font-size:24px;font-weight:700;background:linear-gradient(135deg,#00d4ff,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .status-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:999px;padding:5px 14px;font-size:13px;color:#00d4ff}
     .status-dot{width:8px;height:8px;border-radius:50%;background:#00d4ff;animation:pulse 2s infinite}
     .status-dot.recording{background:#ff4444}
     .status-dot.idle{background:#555;animation:none}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 
-    .video-area{display:flex;gap:16px;width:100%;align-items:flex-start}
-    /* -------- FIXED: use landscape 16:9 container and contain the avatar (no face crop) -------- */
-    .wallie-container{
-      flex:1;
-      position:relative;
-      background:rgba(0,212,255,.04);
-      border:1px solid rgba(0,212,255,.15);
-      border-radius:20px;
-      overflow:hidden;
-      aspect-ratio:16/9;      /* changed */
-      max-height:520px;      /* slightly larger for wide screens */
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    /* Main layout — side by side */
+    .stage{display:flex;gap:16px;width:100%;align-items:stretch}
+
+    /* WALLIE — wide landscape box */
+    .wallie-wrap{
+      flex:1;position:relative;
+      background:#000;
+      border:1px solid rgba(0,212,255,.2);
+      border-radius:16px;overflow:hidden;
+      min-height:380px;
     }
-    /* ensure the video shows the whole avatar (letterbox if necessary) */
     #wallieVideo{
-      width:100%;
-      height:100%;
-      object-fit:contain;     /* changed from cover -> contain */
-      object-position:center center;
+      width:100%;height:100%;
+      object-fit:contain;  /* show full avatar, no crop */
       display:block;
-      background:#021015;     /* letterbox color */
+      background:#000;
     }
-    .wallie-label{position:absolute;bottom:12px;left:12px;background:rgba(2,11,18,.8);border:1px solid rgba(0,212,255,.3);border-radius:8px;padding:4px 10px;font-size:12px;color:#00d4ff;backdrop-filter:blur(8px)}
-    .loading-overlay{position:absolute;inset:0;background:rgba(2,11,18,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s}
-    .loading-overlay.hidden{opacity:0;pointer-events:none}
-    .orca-emoji{font-size:48px;animation:bob 2s ease-in-out infinite}
-    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    .loading-text{font-size:15px;color:rgba(255,255,255,.7)}
-    .loading-bar{width:160px;height:3px;background:rgba(0,212,255,.15);border-radius:99px;overflow:hidden}
-    .loading-bar-fill{height:100%;width:0%;background:#00d4ff;border-radius:99px;transition:width .4s ease}
-    .speaking-bars{display:none;position:absolute;top:12px;right:12px;gap:3px;align-items:flex-end;height:20px}
+    .wallie-label{position:absolute;bottom:10px;left:10px;background:rgba(2,11,18,.85);border:1px solid rgba(0,212,255,.3);border-radius:8px;padding:4px 10px;font-size:12px;color:#00d4ff;backdrop-filter:blur(8px)}
+    .speaking-bars{display:none;position:absolute;top:10px;right:10px;gap:3px;align-items:flex-end;height:20px}
     .speaking-bars.active{display:flex}
     .bar{width:3px;background:#00d4ff;border-radius:2px;animation:barAnim .8s ease-in-out infinite}
     .bar:nth-child(1){height:8px;animation-delay:0s}.bar:nth-child(2){height:14px;animation-delay:.1s}.bar:nth-child(3){height:20px;animation-delay:.2s}.bar:nth-child(4){height:12px;animation-delay:.3s}
     @keyframes barAnim{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
 
-    .right-panel{display:flex;flex-direction:column;gap:12px;width:260px;flex-shrink:0}
-    .guest-container{position:relative;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
-    #guestVideo{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+    /* Loading overlay */
+    .loading-overlay{position:absolute;inset:0;background:rgba(2,11,18,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s}
+    .loading-overlay.hidden{opacity:0;pointer-events:none}
+    .orca{font-size:44px;animation:bob 2s ease-in-out infinite}
+    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .loading-text{font-size:14px;color:rgba(255,255,255,.7)}
+    .loading-bar{width:140px;height:3px;background:rgba(0,212,255,.15);border-radius:99px;overflow:hidden}
+    .loading-bar-fill{height:100%;width:0%;background:#00d4ff;border-radius:99px;transition:width .4s ease}
+
+    /* Right panel */
+    .right-panel{display:flex;flex-direction:column;gap:12px;width:200px;flex-shrink:0}
+
+    /* Guest camera */
+    .guest-wrap{
+      position:relative;
+      background:#111;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;overflow:hidden;
+      aspect-ratio:4/3;
+    }
+    #guestVideo{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
+    .cam-off{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:12px;color:rgba(255,255,255,.4)}
+    .cam-off.hidden{display:none}
     .guest-label{position:absolute;bottom:8px;left:8px;background:rgba(2,11,18,.8);border-radius:6px;padding:3px 8px;font-size:11px;color:rgba(255,255,255,.6)}
-    .controls{display:flex;flex-direction:column;gap:8px}
-    .btn{width:100%;padding:12px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-    .btn:disabled{opacity:.4;cursor:not-allowed}
+
+    /* Controls */
+    .controls{display:flex;flex-direction:column;gap:8px;flex:1}
+    .btn{width:100%;padding:11px;border-radius:11px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .btn:disabled{opacity:.35;cursor:not-allowed}
     .btn-start{background:linear-gradient(135deg,#00d4ff,#0077aa);color:#fff}
-    .btn-start:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,212,255,.3)}
-    .btn-end{background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b}
-    .btn-end:hover:not(:disabled){background:rgba(255,60,60,.2)}
-    .btn-mute{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
-    .rec-badge{display:none;align-items:center;gap:6px;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.25);border-radius:8px;padding:8px 12px;font-size:12px;color:#ff6b6b}
+    .btn-start:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,212,255,.3)}
+    .btn-end{background:rgba(255,60,60,.12);border:1px solid rgba(255,60,60,.3);color:#ff6b6b}
+    .btn-end:hover:not(:disabled){background:rgba(255,60,60,.22)}
+    .btn-mute{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.75)}
+    .btn-cam{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.75)}
+    .rec-badge{display:none;align-items:center;gap:6px;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.25);border-radius:8px;padding:7px 10px;font-size:12px;color:#ff6b6b}
     .rec-badge.visible{display:flex}
 
-    #uploadOverlay{display:none;position:fixed;inset:0;background:rgba(2,11,18,.95);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+    /* Overlays */
+    #uploadOverlay{display:none;position:fixed;inset:0;background:rgba(2,11,18,.96);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:18px}
     #uploadOverlay.visible{display:flex}
-    .upload-spinner{width:48px;height:48px;border:3px solid rgba(0,212,255,.2);border-top-color:#00d4ff;border-radius:50%;animation:spin .8s linear infinite}
+    .spinner{width:44px;height:44px;border:3px solid rgba(0,212,255,.2);border-top-color:#00d4ff;border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .upload-text{font-size:18px;font-weight:600}
-    .upload-sub{font-size:14px;color:rgba(255,255,255,.5);text-align:center;max-width:320px}
-    #doneScreen{display:none;position:fixed;inset:0;background:rgba(2,11,18,.97);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px}
+    .ov-title{font-size:18px;font-weight:600}
+    .ov-sub{font-size:13px;color:rgba(255,255,255,.45);text-align:center;max-width:300px}
+    #doneScreen{display:none;position:fixed;inset:0;background:rgba(2,11,18,.97);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:32px}
     #doneScreen.visible{display:flex}
-    .done-emoji{font-size:64px}
-    .done-title{font-size:28px;font-weight:700}
-    .done-sub{font-size:15px;color:rgba(255,255,255,.5);max-width:360px;line-height:1.6}
+    .done-emoji{font-size:60px}
+    .done-title{font-size:26px;font-weight:700}
+    .done-sub{font-size:14px;color:rgba(255,255,255,.5);max-width:340px;line-height:1.6}
 
-    .tiny-help{font-size:12px;color:rgba(255,255,255,.5);margin-top:8px;text-align:center}
-
-    @media(max-width:920px){
-      .wrapper{max-width:920px;padding:18px}
-      .right-panel{width:220px}
+    @media(max-width:640px){
+      .stage{flex-direction:column}
+      .right-panel{width:100%;flex-direction:row;flex-wrap:wrap}
+      .guest-wrap{flex:1;min-width:130px}
+      .controls{flex:1;min-width:130px}
+      .wallie-wrap{min-height:260px}
     }
-    @media(max-width:640px){.video-area{flex-direction:column}.right-panel{width:100%;flex-direction:row;flex-wrap:wrap}.guest-container{flex:1;min-width:140px}.controls{flex:1;min-width:140px}.wallie-container{max-height:360px}}
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
 <canvas id="particles"></canvas>
+
 <div class="wrapper">
   <div class="header">
     <div class="logo">FairlyEven Hospitality Podcast</div>
     <h1>🎙️ Live with WALLIE</h1>
   </div>
-
   <div class="status-pill">
     <div class="status-dot idle" id="statusDot"></div>
     <span id="statusText">Connecting to WALLIE...</span>
   </div>
 
-  <div class="video-area">
-    <div class="wallie-container" aria-live="polite">
-      <!-- NOTE: these elements are kept and used by LiveKit's attach() call -->
+  <div class="stage">
+    <!-- WALLIE avatar -->
+    <div class="wallie-wrap">
       <video id="wallieVideo" autoplay playsinline></video>
-      <audio id="wallieAudio" autoplay></audio>
-
       <div class="wallie-label">🎙️ WALLIE — Host</div>
-
-      <div class="speaking-bars" id="speakingBars" aria-hidden="true">
+      <div class="speaking-bars" id="speakingBars">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
-
       <div class="loading-overlay" id="loadingOverlay">
-        <div class="orca-emoji">🎙️</div>
+        <div class="orca">🎙️</div>
         <div class="loading-text" id="loadingText">Setting up your interview...</div>
         <div class="loading-bar"><div class="loading-bar-fill" id="loadingFill"></div></div>
       </div>
     </div>
 
+    <!-- Right panel -->
     <div class="right-panel">
-      <div class="guest-container">
+      <div class="guest-wrap">
         <video id="guestVideo" autoplay playsinline muted></video>
+        <div class="cam-off hidden" id="camOff">📷<span>Camera off</span></div>
         <div class="guest-label" id="guestLabel">You</div>
       </div>
-
       <div class="controls">
-        <button class="btn btn-start" id="btnStart">🎙️ Start Interview</button>
-        <button class="btn btn-mute" id="btnMute" disabled>🔇 Mute</button>
-        <button class="btn btn-end" id="btnEnd" disabled>⏹ End Interview</button>
-        <div class="rec-badge" id="recBadge"><div class="status-dot recording"></div> REC</div>
-        <div class="tiny-help">If browser blocks access, allow camera & microphone for this site (lock icon → Site settings)</div>
+        <button class="btn btn-start" id="btnStart" disabled>🎙️ Start Interview</button>
+        <button class="btn btn-mute"  id="btnMute"  disabled>🔇 Mute Mic</button>
+        <button class="btn btn-cam"   id="btnCam"   disabled>📷 Hide Camera</button>
+        <button class="btn btn-end"   id="btnEnd"   disabled>⏹ End Interview</button>
+        <div class="rec-badge" id="recBadge"><div class="status-dot recording"></div>REC</div>
       </div>
     </div>
   </div>
 </div>
 
 <div id="uploadOverlay">
-  <div class="upload-spinner"></div>
-  <div class="upload-text">Saving your episode...</div>
-  <div class="upload-sub">Please don't close this tab. Your recording is being uploaded.</div>
+  <div class="spinner"></div>
+  <div class="ov-title">Saving your episode...</div>
+  <div class="ov-sub">Please don't close this tab. Uploading to FairlyEven.</div>
 </div>
-
 <div id="doneScreen">
   <div class="done-emoji">🌊</div>
   <div class="done-title">You're a star!</div>
-  <div class="done-sub">Thank you for being on the FairlyEven Hospitality Podcast. Your episode will be live soon — check your phone!</div>
+  <div class="done-sub">Thank you for being on the FairlyEven Hospitality Podcast. Your episode will be live soon at fairlyeven.com — check your phone!</div>
 </div>
 
-<!-- LiveKit JS SDK -->
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 
 <script>
-/* -------------- PARAMS -------------- */
-const p = new URLSearchParams(window.location.search);
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const FORM_URL          = 'https://vercel-html-zxxn.vercel.app';
+const RECORDING_WEBHOOK = 'https://n8n.srv1144276.hstgr.cloud/webhook/wallie-recording-upload';
+
+// ─── URL PARAMS ──────────────────────────────────────────────────────────────
+const p             = new URLSearchParams(window.location.search);
 const LIVEKIT_URL   = decodeURIComponent(p.get('livekit_url')   || '');
 const LIVEKIT_TOKEN = decodeURIComponent(p.get('livekit_token') || '');
 const GUEST_NAME    = decodeURIComponent(p.get('name')          || 'Guest');
 const PHONE_SAFE    = p.get('phone_safe') || 'unknown';
 const DATE_SAFE     = p.get('date')       || new Date().toISOString().split('T')[0];
+const ISSUED_AT     = parseInt(p.get('iat') || '0', 10); // unix timestamp set by n8n
 
-const RECORDING_WEBHOOK = 'https://n8n.srv1144276.hstgr.cloud/webhook/wallie-recording-upload'; // keep your webhook
+// ─── EXPIRY CHECK (24 hrs) ───────────────────────────────────────────────────
+(function checkExpiry() {
+  if (!LIVEKIT_TOKEN) { redirectToForm('Missing credentials.'); return; }
+  // Decode JWT payload to get exp
+  try {
+    const payload = JSON.parse(atob(LIVEKIT_TOKEN.split('.')[1]));
+    if (payload.exp && Date.now() / 1000 > payload.exp) {
+      redirectToForm('Your interview link has expired.');
+    }
+  } catch(e) { /* can't decode — allow through, LiveKit will reject if truly expired */ }
+})();
 
-/* -------------- STATE & ELEMENTS -------------- */
-let room = null;
-let guestStream = null;
-let mediaRecorder = null;
+function redirectToForm(reason) {
+  alert('⏰ ' + reason + '\n\nWe\'ll take you back to the sign-up form to get a fresh link!');
+  window.location.href = FORM_URL;
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let room           = null;
+let guestStream    = null;
+let mediaRecorder  = null;
 let recordedChunks = [];
-let isMuted = false;
+let isMuted        = false;
+let isCamOff       = false;
 
+// ─── ELEMENTS ────────────────────────────────────────────────────────────────
 const wallieVideo    = document.getElementById('wallieVideo');
-const wallieAudio    = document.getElementById('wallieAudio');
 const guestVideo     = document.getElementById('guestVideo');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const loadingText    = document.getElementById('loadingText');
 const loadingFill    = document.getElementById('loadingFill');
 const statusDot      = document.getElementById('statusDot');
-const statusText     = document.getElementById('statusText');
+const statusText_el  = document.getElementById('statusText');
 const speakingBars   = document.getElementById('speakingBars');
 const btnStart       = document.getElementById('btnStart');
 const btnMute        = document.getElementById('btnMute');
+const btnCam         = document.getElementById('btnCam');
 const btnEnd         = document.getElementById('btnEnd');
 const recBadge       = document.getElementById('recBadge');
 const guestLabel     = document.getElementById('guestLabel');
+const camOff         = document.getElementById('camOff');
 const uploadOverlay  = document.getElementById('uploadOverlay');
 const doneScreen     = document.getElementById('doneScreen');
 
-/* -------------- Small UI helpers -------------- */
-function setStatus(dot, text){
-  statusDot.className = 'status-dot ' + (dot || '');
-  statusText.textContent = text || '';
-}
-function setLoading(text, pct){
-  loadingText.textContent = text || '';
-  loadingFill.style.width = (pct || 0) + '%';
-}
-
-/* -------------- PARTICLES (unchanged) -------------- */
-(function(){
-  const c=document.getElementById('particles'),ctx=c.getContext('2d');
-  let W,H;
-  const pts=Array.from({length:60},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.5,dx:(Math.random()-.5)*.3,dy:(Math.random()-.5)*.3,o:Math.random()*.5+.1}));
-  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
-  resize();window.addEventListener('resize',resize);
-  (function draw(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(0,212,255,${p.o})`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>W)p.dx*=-1;if(p.y<0||p.y>H)p.dy*=-1;});requestAnimationFrame(draw);})();
-})();
-
-/* -------------- Guest label -------------- */
+function setStatus(dot, text) { statusDot.className = 'status-dot ' + dot; statusText_el.textContent = text; }
+function setLoading(text, pct) { loadingText.textContent = text; loadingFill.style.width = pct + '%'; }
 guestLabel.textContent = GUEST_NAME.split(' ')[0] || 'You';
 
-/* -------------- CAMERA (robust) -------------- */
-async function initCamera(){
-  try{
-    // Try to get both video & audio
+// ─── PARTICLES ───────────────────────────────────────────────────────────────
+(function(){
+  const c = document.getElementById('particles'), ctx = c.getContext('2d');
+  let W, H;
+  const pts = Array.from({length:55}, () => ({
+    x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+    r: Math.random()*1.5+.5, dx:(Math.random()-.5)*.25, dy:(Math.random()-.5)*.25, o:Math.random()*.4+.1
+  }));
+  function resize(){ W=c.width=innerWidth; H=c.height=innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  (function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=`rgba(0,212,255,${p.o})`; ctx.fill(); p.x+=p.dx; p.y+=p.dy; if(p.x<0||p.x>W)p.dx*=-1; if(p.y<0||p.y>H)p.dy*=-1; });
+    requestAnimationFrame(draw);
+  })();
+})();
+
+// ─── CAMERA / MIC ────────────────────────────────────────────────────────────
+async function initCamera() {
+  try {
     guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     guestVideo.srcObject = guestStream;
-    guestVideo.muted = true; // local preview muted to avoid echo
-    guestVideo.playsInline = true;
-    await guestVideo.play().catch(()=>{});
-    setStatus('', 'Camera & mic ready');
-    return true;
-  }catch(err){
-    console.warn('getUserMedia failed', err);
-    setStatus('idle', 'Camera/mic blocked or unavailable');
-    showEnableMediaPrompt();
-    return false;
+    camOff.classList.add('hidden');
+  } catch(e) {
+    console.warn('Camera failed, trying audio only:', e);
+    try {
+      guestStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+      camOff.classList.remove('hidden');
+    } catch(e2) {
+      console.warn('No media access at all:', e2);
+      camOff.classList.remove('hidden');
+    }
   }
 }
 
-function showEnableMediaPrompt(){
-  if(document.getElementById('enableMediaBtn')) return;
-  const b = document.createElement('button');
-  b.id = 'enableMediaBtn';
-  b.className = 'btn btn-start';
-  b.textContent = 'Enable Camera & Microphone';
-  b.style.position = 'fixed';
-  b.style.right = '20px';
-  b.style.bottom = '20px';
-  b.onclick = async () => { b.disabled = true; setLoading('Requesting permissions...', 10); await initCamera(); b.remove(); };
-  document.body.appendChild(b);
-}
+// ─── LIVEKIT ─────────────────────────────────────────────────────────────────
+async function initLiveKit() {
+  setLoading('Connecting to WALLIE...', 25);
 
-/* -------------- LIVEKIT CONNECTION & TRACK HANDLING -------------- */
-async function initLiveKit(){
-  setLoading('Loading WALLIE...', 20);
-
-  if(!LIVEKIT_URL || !LIVEKIT_TOKEN){
-    setLoading('Missing session credentials. Please use the link from your SMS.', 0);
-    setStatus('idle','Missing credentials');
-    return false;
+  if (!LIVEKIT_URL || !LIVEKIT_TOKEN) {
+    redirectToForm('Missing session credentials.');
+    return;
   }
 
   try {
-    const { Room, RoomEvent, Track } = window.LivekitClient;
+    const { Room, RoomEvent, Track, createLocalAudioTrack, createLocalVideoTrack } = window.LivekitClient;
 
-    room = new Room({
-      adaptiveStream: true,
-      dynacast: true,
-    });
+    room = new Room({ adaptiveStream: true, dynacast: true });
 
-    // When avatar video/audio track arrives
-    room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-      console.log('Track subscribed:', track.kind, participant.identity);
+    // ── Avatar video track ──
+    room.on(RoomEvent.TrackSubscribed, (track, pub, participant) => {
+      console.log('Track:', track.kind, 'from', participant.identity);
 
       if (track.kind === Track.Kind.Video) {
-        // Attach into the existing video element (keeps layout)
+        const el = track.attach();
+        // Copy stream from attached element to our video element
+        wallieVideo.srcObject = el.srcObject || null;
+        // Fallback: use attach directly on our video element
         track.attach(wallieVideo);
-        wallieVideo.playsInline = true;
-        wallieVideo.autoplay = true;
-        wallieVideo.muted = false;
-        wallieVideo.volume = 1.0;
-        wallieVideo.play().catch(()=> console.warn('Video autoplay blocked; will play on user gesture'));
+
         setLoading('WALLIE is ready!', 100);
-        setTimeout(()=> loadingOverlay.classList.add('hidden'), 600);
+        setTimeout(() => loadingOverlay.classList.add('hidden'), 700);
         setStatus('', 'Ready — click Start Interview');
         btnStart.disabled = false;
       }
 
       if (track.kind === Track.Kind.Audio) {
-        // Attach the audio track to our audio element
-        track.attach(wallieAudio);
-        wallieAudio.autoplay = true;
-        wallieAudio.muted = false;
-        wallieAudio.volume = 1.0;
-        wallieAudio.play().catch(()=> console.warn('Audio autoplay blocked; will play on user gesture'));
+        // Let LiveKit handle audio — attach to a new element and add to DOM
+        const audioEl = track.attach();
+        audioEl.autoplay = true;
+        audioEl.style.display = 'none';
+        document.body.appendChild(audioEl);
+        console.log('Audio attached');
       }
     });
 
-    room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
-      // If WALLIE is speaking, show speaking bars
-      const wallieSpeak = speakers.some(s => s.identity !== 'client');
-      speakingBars.classList.toggle('active', wallieSpeak);
+    room.on(RoomEvent.ActiveSpeakersChanged, speakers => {
+      const wallieActive = speakers.some(s => s.identity !== 'client' && s.identity !== 'user');
+      speakingBars.classList.toggle('active', wallieActive);
     });
 
-    room.on(RoomEvent.Disconnected, () => {
+    room.on(RoomEvent.Disconnected, (reason) => {
       setStatus('idle', 'Disconnected');
+      if (reason === 'token_expired' || reason === 'TokenExpired') {
+        redirectToForm('Your session has expired.');
+      }
     });
 
-    room.on(RoomEvent.ConnectionStateChanged, (state) => {
-      console.log('Connection state:', state);
-      if(state === 'connecting') setLoading('Joining room...', 60);
-      if(state === 'connected')  setLoading('Waiting for WALLIE...', 80);
+    room.on(RoomEvent.ConnectionStateChanged, state => {
+      if (state === 'connecting') setLoading('Joining room...', 50);
+      if (state === 'connected')  setLoading('Waiting for WALLIE to join...', 75);
     });
 
-    setLoading('Connecting...', 40);
+    setLoading('Connecting...', 35);
     await room.connect(LIVEKIT_URL, LIVEKIT_TOKEN);
 
-    // Publish guest mic and camera so WALLIE can hear/see the guest
-    if (guestStream) {
-      try {
-        const { LocalAudioTrack, LocalVideoTrack } = window.LivekitClient;
-        const audioTrack = guestStream.getAudioTracks()[0];
-        const videoTrack = guestStream.getVideoTracks()[0];
+    // ── Publish guest mic ──
+    try {
+      const micTrack = await createLocalAudioTrack({ echoCancellation: true, noiseSuppression: true });
+      await room.localParticipant.publishTrack(micTrack);
+      console.log('Mic published');
+    } catch(e) { console.warn('Could not publish mic:', e); }
 
-        if (audioTrack) {
-          const localAudio = new LocalAudioTrack(audioTrack);
-          await room.localParticipant.publishTrack(localAudio);
-        }
-        if (videoTrack) {
-          const localVideo = new LocalVideoTrack(videoTrack);
-          await room.localParticipant.publishTrack(localVideo);
-        }
-      } catch (pubErr) {
-        console.warn('Publish track error', pubErr);
+    // ── Publish guest camera ──
+    try {
+      const camTrack = await createLocalVideoTrack({ width: 320, height: 240 });
+      await room.localParticipant.publishTrack(camTrack);
+      // Also show local preview
+      if (guestStream) {
+        const localVideoEl = camTrack.attach();
+        localVideoEl.style.display = 'none';
+        document.body.appendChild(localVideoEl);
       }
-    }
+      console.log('Camera published');
+    } catch(e) { console.warn('Could not publish camera:', e); }
 
-    return true;
-  } catch (err) {
+  } catch(err) {
     console.error('LiveKit error:', err);
-    setLoading('Could not connect to WALLIE. Please refresh or contact support.', 0);
-    setStatus('idle', 'Connection failed');
-    return false;
+    if (err.message?.includes('expired') || err.message?.includes('token')) {
+      redirectToForm('Your session link has expired.');
+    } else {
+      setLoading('Could not connect. Please refresh or contact support.', 0);
+      setStatus('idle', 'Connection failed');
+    }
   }
 }
 
-/* -------------- RECORDING (unchanged logic, improved robustness) -------------- */
-function startRecording(){
-  try{
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// ─── RECORDING ───────────────────────────────────────────────────────────────
+function startRecording() {
+  try {
+    const audioCtx = new AudioContext();
     const dest     = audioCtx.createMediaStreamDestination();
 
-    if(guestStream) {
-      try { audioCtx.createMediaStreamSource(guestStream).connect(dest); } catch(e) { console.warn('guest audio connect failed', e); }
+    // Guest mic
+    if (guestStream && guestStream.getAudioTracks().length) {
+      audioCtx.createMediaStreamSource(guestStream).connect(dest);
     }
 
-    // Capture WALLIE audio from audio element
-    try {
-      // wallieAudio may have an internal MediaStream; we attempt to use it
-      const wallieStream = wallieAudio.srcObject;
-      if(wallieStream) {
-        audioCtx.createMediaStreamSource(wallieStream).connect(dest);
-      } else {
-        // fallback: try capturing the audio element using captureStream (may not be supported)
-        if (wallieAudio.captureStream) {
-          audioCtx.createMediaStreamSource(wallieAudio.captureStream()).connect(dest);
-        }
-      }
-    } catch(e) {
-      console.warn('Could not capture WALLIE audio into recorder', e);
-    }
+    // WALLIE audio — grab from any hidden audio element LiveKit created
+    document.querySelectorAll('audio').forEach(a => {
+      try {
+        if (a.srcObject) audioCtx.createMediaStreamSource(a.srcObject).connect(dest);
+      } catch(e) {}
+    });
 
+    // WALLIE video
     const videoTracks = wallieVideo.srcObject ? wallieVideo.srcObject.getVideoTracks() : [];
     const combined    = new MediaStream([...videoTracks, ...dest.stream.getAudioTracks()]);
 
     recordedChunks = [];
-    mediaRecorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp8,opus' });
-    mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+      ? 'video/webm;codecs=vp8,opus' : 'video/webm';
+    mediaRecorder = new MediaRecorder(combined, { mimeType });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
     mediaRecorder.start(1000);
     recBadge.classList.add('visible');
-  }catch(err){
-    console.error('Recording error:',err);
-    try{
-      recordedChunks=[];
-      mediaRecorder=new MediaRecorder(guestStream || new MediaStream());
-      mediaRecorder.ondataavailable=e=>{if(e.data.size>0) recordedChunks.push(e.data);};
+    console.log('Recording started');
+  } catch(err) {
+    console.error('Recording error:', err);
+    // Audio-only fallback
+    try {
+      const fallback = guestStream || new MediaStream();
+      mediaRecorder = new MediaRecorder(fallback);
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
       mediaRecorder.start(1000);
       recBadge.classList.add('visible');
-    }catch(e2){console.warn('Fallback recording failed',e2);}
+    } catch(e2) { console.warn('Fallback recording failed:', e2); }
   }
 }
 
-function stopRecording(){
-  return new Promise(resolve=>{
-    if(!mediaRecorder || mediaRecorder.state==='inactive'){ resolve(null); return; }
-    mediaRecorder.onstop = ()=> {
-      resolve(new Blob(recordedChunks,{type:'video/webm'}));
-    };
+function stopRecording() {
+  return new Promise(resolve => {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') { resolve(null); return; }
+    mediaRecorder.onstop = () => resolve(new Blob(recordedChunks, { type: 'video/webm' }));
     mediaRecorder.stop();
     recBadge.classList.remove('visible');
   });
 }
 
-async function uploadRecording(blob){
+async function uploadRecording(blob) {
   uploadOverlay.classList.add('visible');
   const filename = `${PHONE_SAFE}_${DATE_SAFE}_wallie.webm`;
   const fd = new FormData();
-  fd.append('recording', blob, filename);
+  fd.append('recording',  blob, filename);
   fd.append('phone_safe', PHONE_SAFE);
-  fd.append('date', DATE_SAFE);
+  fd.append('date',       DATE_SAFE);
   fd.append('guest_name', GUEST_NAME);
-  fd.append('filename', filename);
-  try {
-    await fetch(RECORDING_WEBHOOK, { method:'POST', body: fd });
-  } catch(err) {
-    console.error('Upload failed:', err);
-  }
+  fd.append('filename',   filename);
+  try { await fetch(RECORDING_WEBHOOK, { method: 'POST', body: fd }); }
+  catch(e) { console.error('Upload failed:', e); }
   uploadOverlay.classList.remove('visible');
   doneScreen.classList.add('visible');
 }
 
-/* -------------- BUTTONS (Start = user gesture for autoplay/permissions) -------------- */
-btnStart.addEventListener('click', async () => {
-  // User gesture: try to init camera first if not yet allowed
-  btnStart.disabled = true;
-  setStatus('', 'Starting interview...');
-  setLoading('Requesting camera & mic...', 10);
-
-  const camOk = guestStream ? true : await initCamera();
-
-  // Now connect to LiveKit and publish if needed
-  setLoading('Connecting to WALLIE...', 30);
-  const liveOk = await initLiveKit();
-
-  if (!liveOk) {
-    btnStart.disabled = false;
-    return;
-  }
-
-  // Make sure audio/video elements are playing — this is the user gesture that allows autoplay
-  try { await wallieAudio.play().catch(()=>{}); } catch(e) {}
-  try { await wallieVideo.play().catch(()=>{}); } catch(e) {}
-
-  // Enable controls
-  btnMute.disabled = false;
-  btnEnd.disabled = false;
+// ─── BUTTONS ─────────────────────────────────────────────────────────────────
+btnStart.addEventListener('click', () => {
+  btnStart.disabled = true; btnMute.disabled = false;
+  btnCam.disabled = false;  btnEnd.disabled  = false;
   setStatus('', 'Interview live 🎙️');
-
-  // Start local recording
   startRecording();
 });
 
 btnMute.addEventListener('click', () => {
   isMuted = !isMuted;
-  if (guestStream) {
-    guestStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
-  }
-  btnMute.textContent = isMuted ? '🔊 Unmute' : '🔇 Mute';
+  // Mute LiveKit local audio tracks
+  room?.localParticipant?.audioTrackPublications?.forEach(pub => {
+    if (pub.track) pub.track.mute ? pub.track.mute() : (pub.track.mediaStreamTrack.enabled = !isMuted);
+  });
+  // Also mute local stream
+  if (guestStream) guestStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+  btnMute.textContent = isMuted ? '🔊 Unmute Mic' : '🔇 Mute Mic';
+});
+
+btnCam.addEventListener('click', () => {
+  isCamOff = !isCamOff;
+  room?.localParticipant?.videoTrackPublications?.forEach(pub => {
+    if (pub.track) pub.track.mediaStreamTrack.enabled = !isCamOff;
+  });
+  if (guestStream) guestStream.getVideoTracks().forEach(t => t.enabled = !isCamOff);
+  btnCam.textContent = isCamOff ? '📷 Show Camera' : '📷 Hide Camera';
+  guestVideo.style.display = isCamOff ? 'none' : 'block';
+  camOff.classList.toggle('hidden', !isCamOff);
 });
 
 btnEnd.addEventListener('click', async () => {
   if (!confirm('End the interview? Your recording will be saved.')) return;
-  btnEnd.disabled = btnStart.disabled = btnMute.disabled = true;
+  btnEnd.disabled = btnStart.disabled = btnMute.disabled = btnCam.disabled = true;
   setStatus('idle', 'Ending session...');
-  try { await room?.disconnect(); } catch(e){}
+  try { await room?.disconnect(); } catch(e) {}
   if (guestStream) guestStream.getTracks().forEach(t => t.stop());
   const blob = await stopRecording();
   if (blob && blob.size > 0) await uploadRecording(blob);
   else doneScreen.classList.add('visible');
 });
 
-/* -------------- BOOT: try to warm camera request once (optional) -------------- */
-(async ()=>{
-  setStatus('idle','Starting...');
-  setLoading('Starting...', 5);
-  // try gently to get camera (won't show dialog on some browsers until user gesture),
-  // but if blocked it will show an enable button for the user to click.
-  await initCamera().catch(()=>{});
-  setLoading('Ready', 0);
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+(async () => {
+  setStatus('idle', 'Starting camera...');
+  setLoading('Starting camera...', 10);
+  await initCamera();
+  await initLiveKit();
 })();
 </script>
 </body>
