@@ -179,7 +179,7 @@ async function initLiveKit(){
   }
 
   try{
-    const {Room,RoomEvent,Track,LocalAudioTrack}=window.LivekitClient;
+    const {Room,RoomEvent,Track}=window.LivekitClient;
 
     room=new Room({
       adaptiveStream:true,
@@ -251,17 +251,29 @@ async function initLiveKit(){
 
     clearTimeout(timeoutId);
 
-    // ── Publish guest mic from the SAME guestStream already captured ──
-    // This avoids double mic capture which breaks audio on many browsers
+    // ── Publish guest mic ──
+    // Stop the guestStream audio so LiveKit can capture it fresh
+    // (two simultaneous captures of the same mic causes conflicts)
     if(guestStream){
-      const micTrack = guestStream.getAudioTracks()[0];
-      if(micTrack){
-        const localAudioTrack = new LocalAudioTrack(micTrack, undefined, false);
-        await room.localParticipant.publishTrack(localAudioTrack);
-        console.log('Guest mic published from existing stream ✓');
-      } else {
-        console.warn('No audio track in guestStream');
+      guestStream.getAudioTracks().forEach(t => { t.stop(); t.enabled = false; });
+    }
+    try{
+      // setMicrophoneEnabled is the simplest, most reliable LiveKit mic API
+      await room.localParticipant.setMicrophoneEnabled(true);
+      console.log('Guest mic enabled via setMicrophoneEnabled ✓');
+
+      // Re-bind the mic track to guestStream for mute button to work
+      const pubTrack = room.localParticipant.getTrackPublication('microphone');
+      if(pubTrack && pubTrack.track && guestStream){
+        const newAudioTrack = pubTrack.track.mediaStreamTrack;
+        // Remove old audio tracks and add the LiveKit-managed one
+        guestStream.getAudioTracks().forEach(t => guestStream.removeTrack(t));
+        guestStream.addTrack(newAudioTrack);
+        console.log('guestStream audio re-bound to LiveKit track ✓');
       }
+    }catch(e){
+      console.error('Mic enable failed:', e);
+      setStatus('idle', '⚠️ Mic failed — please allow microphone access and refresh');
     }
 
   }catch(err){
@@ -399,9 +411,10 @@ btnStart.addEventListener('click',()=>{
   btnStart.disabled=true;btnMute.disabled=false;btnCam.disabled=false;btnEnd.disabled=false;
   setStatus('','Interview live 🎙️');startRecording();
 });
-btnMute.addEventListener('click',()=>{
+btnMute.addEventListener('click',async()=>{
   isMuted=!isMuted;
-  if(guestStream)guestStream.getAudioTracks().forEach(t=>t.enabled=!isMuted);
+  // Mute via LiveKit — this is the correct way when LiveKit owns the mic
+  await room.localParticipant.setMicrophoneEnabled(!isMuted);
   btnMute.textContent=isMuted?'🔊 Unmute':'🔇 Mute';
   btnMute.classList.toggle('btn-active',isMuted);
 });
