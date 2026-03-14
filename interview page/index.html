@@ -29,19 +29,19 @@
     /* Video row: takes all remaining space, never overflows */
     .video-row{
       flex:1;
-      min-height:0; /* critical — lets flex child shrink below content size */
+      min-height:0;
       display:grid;
-      grid-template-columns:1fr 1fr;
+      grid-template-rows:1fr 1fr;
+      grid-template-columns:1fr;
       gap:8px;
       width:100%;
-      max-width:860px;
+      max-width:480px; /* 9:16 portrait width */
       overflow:hidden;
     }
     .video-box{
       position:relative;background:#0a1520;
       border-radius:12px;overflow:hidden;
       border:1px solid rgba(0,212,255,.2);
-      /* Fill the grid cell completely */
       min-height:0;
     }
     .video-box video{width:100%;height:100%;display:block;object-fit:cover}
@@ -107,12 +107,13 @@
 </head>
 <body>
 <canvas id="particles"></canvas>
-<canvas id="recordCanvas" width="1280" height="720"></canvas>
+<canvas id="recordCanvas" width="1080" height="1920"></canvas>
 
 <div class="shell">
   <div class="header">
     <div class="logo">FairlyEven Hospitality Podcast</div>
     <h1>🎙️ Live with WALLIE</h1>
+    <a href="https://waveclosers.com" target="_blank" style="font-size:11px;color:rgba(0,212,255,0.7);text-decoration:none;letter-spacing:1px">🌊 waveclosers.com</a>
   </div>
   <div class="status-pill">
     <div class="status-dot idle" id="statusDot"></div>
@@ -328,13 +329,27 @@ async function initLiveKit(){
   }
 }
 
-// ── Canvas composite recording (50/50 branded) ────────────────────────────────
-const CW=1280,CH=720,HALF=640;
+// ── Canvas: 1080x1920 vertical (9:16) — WALLIE top, Guest bottom ──────────────
+const CW=1080, CH=1920;
+const PAD=20;
+const TOP_BAR=80;      // podcast title bar at top
+const BOT_BAR=60;      // waveclosers.com bar at bottom
+const DIVIDER=8;       // gap between the two video panels
+const LABEL_H=52;      // name label height inside each panel
 
+// Each panel takes exactly half the remaining height
+const PANEL_H = Math.floor((CH - TOP_BAR - BOT_BAR - DIVIDER) / 2);
+const PANEL_W = CW - PAD*2;
+
+// Rounded rect helpers
 function rr(ctx,x,y,w,h,r){
   ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
   ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
   ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+function rrTop(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x,y+h);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+  ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h);ctx.closePath();
 }
 function rrBottom(ctx,x,y,w,h,r){
   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h-r);
@@ -342,64 +357,110 @@ function rrBottom(ctx,x,y,w,h,r){
   ctx.lineTo(x,y);ctx.closePath();
 }
 
-function drawFrame(){
-  // Background
-  const bg=rctx.createLinearGradient(0,0,CW,CH);
-  bg.addColorStop(0,'#020b12');bg.addColorStop(1,'#051825');
-  rctx.fillStyle=bg;rctx.fillRect(0,0,CW,CH);
-  // Grid
-  rctx.strokeStyle='rgba(0,212,255,0.04)';rctx.lineWidth=1;
-  for(let x=0;x<CW;x+=40){rctx.beginPath();rctx.moveTo(x,0);rctx.lineTo(x,CH);rctx.stroke();}
-  for(let y=0;y<CH;y+=40){rctx.beginPath();rctx.moveTo(0,y);rctx.lineTo(CW,y);rctx.stroke();}
+function drawPanel(video, x, y, w, h, mirrored){
+  rctx.fillStyle='rgba(8,18,30,0.95)';
+  rr(rctx,x,y,w,h,18);rctx.fill();
+  rctx.strokeStyle='rgba(0,212,255,0.4)';
+  rctx.lineWidth=2;
+  rr(rctx,x,y,w,h,18);rctx.stroke();
 
-  const PAD=20,TOP=50,VW=HALF-PAD*2,VH=CH-TOP-56;
-
-  // WALLIE card
-  rctx.fillStyle='rgba(10,21,32,0.9)';rr(rctx,PAD,TOP,VW,VH,12);rctx.fill();
-  rctx.strokeStyle='rgba(0,212,255,0.5)';rctx.lineWidth=2;rr(rctx,PAD,TOP,VW,VH,12);rctx.stroke();
-  if(wallieVideo.readyState>=2&&wallieVideo.videoWidth>0){
-    const vw=wallieVideo.videoWidth,vh=wallieVideo.videoHeight;
-    const scale=Math.min(VW/vw,VH/vh);
-    const dw=vw*scale,dh=vh*scale,dx=PAD+(VW-dw)/2,dy=TOP+(VH-dh)/2;
-    rctx.save();rr(rctx,PAD,TOP,VW,VH,12);rctx.clip();
-    rctx.drawImage(wallieVideo,dx,dy,dw,dh);rctx.restore();
-  }
-
-  // Guest card
-  const GX=HALF+PAD;
-  rctx.fillStyle='rgba(10,21,32,0.9)';rr(rctx,GX,TOP,VW,VH,12);rctx.fill();
-  rctx.strokeStyle='rgba(0,212,255,0.35)';rctx.lineWidth=2;rr(rctx,GX,TOP,VW,VH,12);rctx.stroke();
-  if(guestVideo.readyState>=2&&guestVideo.videoWidth>0&&!isCamOff){
-    const gw=guestVideo.videoWidth,gh=guestVideo.videoHeight;
-    const scale=Math.max(VW/gw,VH/gh);
-    const sw=VW/scale,sh=VH/scale,sx=(gw-sw)/2,sy=(gh-sh)/2;
-    rctx.save();rr(rctx,GX,TOP,VW,VH,12);rctx.clip();
-    rctx.translate(GX+VW,TOP);rctx.scale(-1,1);
-    rctx.drawImage(guestVideo,sx,sy,sw,sh,0,0,VW,VH);
+  const videoH = h - LABEL_H;
+  if(video.readyState>=2 && video.videoWidth>0){
+    const vw=video.videoWidth, vh=video.videoHeight;
+    // Cover fit inside panel video area
+    const scale=Math.max(w/vw, videoH/vh);
+    const dw=vw*scale, dh=vh*scale;
+    const sx=(dw-w)/2/scale, sy=(dh-videoH)/2/scale;
+    const sw=w/scale, sh=videoH/scale;
+    rctx.save();
+    rr(rctx,x,y,w,h,18);rctx.clip();
+    if(mirrored){
+      rctx.translate(x+w,y);rctx.scale(-1,1);
+      rctx.drawImage(video,sx,sy,sw,sh,0,0,w,videoH);
+    } else {
+      rctx.drawImage(video,sx,sy,sw,sh,x,y,w,videoH);
+    }
     rctx.restore();
-  } else if(isCamOff){
-    rctx.fillStyle='rgba(255,255,255,0.15)';rctx.font='40px Arial';rctx.textAlign='center';
-    rctx.fillText('📷',GX+VW/2,TOP+VH/2+14);
-    rctx.font='14px Arial';rctx.fillStyle='rgba(255,255,255,0.4)';
-    rctx.fillText('Camera off',GX+VW/2,TOP+VH/2+40);rctx.textAlign='left';
+  }
+}
+
+function drawFrame(){
+  // ── Background ──
+  const bg=rctx.createLinearGradient(0,0,0,CH);
+  bg.addColorStop(0,'#020b12');bg.addColorStop(0.5,'#051825');bg.addColorStop(1,'#020b12');
+  rctx.fillStyle=bg;rctx.fillRect(0,0,CW,CH);
+
+  // Subtle grid
+  rctx.strokeStyle='rgba(0,212,255,0.03)';rctx.lineWidth=1;
+  for(let gx=0;gx<CW;gx+=50){rctx.beginPath();rctx.moveTo(gx,0);rctx.lineTo(gx,CH);rctx.stroke();}
+  for(let gy=0;gy<CH;gy+=50){rctx.beginPath();rctx.moveTo(0,gy);rctx.lineTo(CW,gy);rctx.stroke();}
+
+  // ── Top bar: podcast branding ──
+  const topGrad=rctx.createLinearGradient(0,0,CW,0);
+  topGrad.addColorStop(0,'rgba(0,60,100,0.97)');topGrad.addColorStop(1,'rgba(0,30,60,0.97)');
+  rctx.fillStyle=topGrad;rctx.fillRect(0,0,CW,TOP_BAR);
+  // Cyan accent line under top bar
+  rctx.fillStyle='#00d4ff';rctx.fillRect(0,TOP_BAR-2,CW,2);
+
+  rctx.fillStyle='#00d4ff';
+  rctx.font='bold 22px Arial, sans-serif';
+  rctx.textAlign='center';
+  rctx.fillText('FAIRLYEVEN HOSPITALITY PODCAST', CW/2, 32);
+  rctx.fillStyle='rgba(255,255,255,0.7)';
+  rctx.font='16px Arial, sans-serif';
+  rctx.fillText('waveclosers.com', CW/2, 58);
+  rctx.textAlign='left';
+
+  // ── WALLIE panel (top half) ──
+  const WALLIE_Y = TOP_BAR + PAD;
+  drawPanel(wallieVideo, PAD, WALLIE_Y, PANEL_W, PANEL_H, false);
+
+  // WALLIE name label inside panel bottom
+  const wLabelY = WALLIE_Y + PANEL_H - LABEL_H;
+  const wGrad=rctx.createLinearGradient(PAD,wLabelY,PAD+PANEL_W,wLabelY);
+  wGrad.addColorStop(0,'rgba(0,80,130,0.95)');wGrad.addColorStop(1,'rgba(0,40,80,0.95)');
+  rctx.fillStyle=wGrad;
+  rrBottom(rctx,PAD,wLabelY,PANEL_W,LABEL_H,18);rctx.fill();
+  rctx.fillStyle='#fff';rctx.font='bold 28px Arial';
+  rctx.fillText('🎙️  WALLIE', PAD+20, wLabelY+32);
+  rctx.fillStyle='rgba(0,212,255,0.9)';rctx.font='18px Arial';
+  rctx.fillText('FairlyEven Host', PAD+20, wLabelY+LABEL_H-10);
+
+  // ── Guest panel (bottom half) ──
+  const GUEST_Y = WALLIE_Y + PANEL_H + DIVIDER;
+  if(!isCamOff){
+    drawPanel(guestVideo, PAD, GUEST_Y, PANEL_W, PANEL_H, true);
+  } else {
+    rctx.fillStyle='rgba(8,18,30,0.95)';
+    rr(rctx,PAD,GUEST_Y,PANEL_W,PANEL_H,18);rctx.fill();
+    rctx.strokeStyle='rgba(0,212,255,0.3)';rctx.lineWidth=2;
+    rr(rctx,PAD,GUEST_Y,PANEL_W,PANEL_H,18);rctx.stroke();
+    rctx.fillStyle='rgba(255,255,255,0.2)';rctx.font='60px Arial';rctx.textAlign='center';
+    rctx.fillText('📷',CW/2,GUEST_Y+PANEL_H/2-20);
+    rctx.font='20px Arial';rctx.fillStyle='rgba(255,255,255,0.4)';
+    rctx.fillText('Camera off',CW/2,GUEST_Y+PANEL_H/2+30);
+    rctx.textAlign='left';
   }
 
-  // Top bar
-  rctx.fillStyle='rgba(2,11,18,0.9)';rctx.fillRect(0,0,CW,TOP);
-  rctx.fillStyle='#00d4ff';rctx.font='bold 15px Arial';rctx.textAlign='center';
-  rctx.fillText('FAIRLYEVEN HOSPITALITY PODCAST',CW/2,33);rctx.textAlign='left';
+  // Guest name label
+  const gLabelY = GUEST_Y + PANEL_H - LABEL_H;
+  const gGrad=rctx.createLinearGradient(PAD,gLabelY,PAD+PANEL_W,gLabelY);
+  gGrad.addColorStop(0,'rgba(0,50,90,0.95)');gGrad.addColorStop(1,'rgba(0,25,55,0.95)');
+  rctx.fillStyle=gGrad;
+  rrBottom(rctx,PAD,gLabelY,PANEL_W,LABEL_H,18);rctx.fill();
+  rctx.fillStyle='#fff';rctx.font='bold 28px Arial';
+  rctx.fillText('👤  '+GUEST_NAME, PAD+20, gLabelY+32);
 
-  // Name bars
-  const LY=TOP+VH,LH=36;
-  const wg=rctx.createLinearGradient(PAD,LY,PAD+VW,LY);
-  wg.addColorStop(0,'rgba(0,80,120,0.95)');wg.addColorStop(1,'rgba(0,40,70,0.95)');
-  rctx.fillStyle=wg;rrBottom(rctx,PAD,LY,VW,LH,12);rctx.fill();
-  rctx.fillStyle='#fff';rctx.font='bold 14px Arial';rctx.fillText('🎙️  WALLIE — FairlyEven Host',PAD+12,LY+24);
+  // ── Bottom bar: waveclosers.com ──
+  const BOT_Y = CH - BOT_BAR;
+  const botGrad=rctx.createLinearGradient(0,BOT_Y,CW,BOT_Y);
+  botGrad.addColorStop(0,'rgba(0,60,100,0.97)');botGrad.addColorStop(1,'rgba(0,30,60,0.97)');
+  rctx.fillStyle=botGrad;rctx.fillRect(0,BOT_Y,CW,BOT_BAR);
+  rctx.fillStyle='#00d4ff';rctx.fillRect(0,BOT_Y,CW,2);
 
-  const gg=rctx.createLinearGradient(GX,LY,GX+VW,LY);
-  gg.addColorStop(0,'rgba(0,50,80,0.95)');gg.addColorStop(1,'rgba(0,30,55,0.95)');
-  rctx.fillStyle=gg;rrBottom(rctx,GX,LY,VW,LH,12);rctx.fill();
-  rctx.fillStyle='#fff';rctx.font='bold 14px Arial';rctx.fillText('👤  '+GUEST_NAME,GX+12,LY+24);
+  rctx.fillStyle='#fff';rctx.font='bold 24px Arial';rctx.textAlign='center';
+  rctx.fillText('🌊  waveclosers.com', CW/2, BOT_Y+38);
+  rctx.textAlign='left';
 
   canvasRaf=requestAnimationFrame(drawFrame);
 }
