@@ -256,14 +256,20 @@ async function initLiveKit(){
         const audioEl = document.createElement('audio');
         audioEl.id = 'paulAudioEl';
         audioEl.autoplay = true;
+        audioEl.muted = false;   // must NOT be muted for captureStream() to work
+        audioEl.volume = 1.0;
         audioEl.style.display = 'none';
         document.body.appendChild(audioEl);
         track.attach(audioEl);
-        // Ensure it plays even if autoplay was blocked
-        audioEl.play().catch(() => {
-          document.addEventListener('click', () => audioEl.play(), {once: true});
-        });
-        console.log('Paul audio attached ✓', track.mediaStreamTrack?.label);
+        // Ensure it plays — captureStream() only works on a playing element
+        const playPromise = audioEl.play();
+        if(playPromise){
+          playPromise.catch(() => {
+            // Retry on first user interaction
+            document.addEventListener('click', () => audioEl.play(), {once: true});
+          });
+        }
+        console.log('Paul audio element ready ✓', track.mediaStreamTrack?.label);
       }
     });
 
@@ -485,34 +491,51 @@ function startRecording(){
       console.log("Guest mic in recording ✓",micRawTrack.label);
     }else{console.warn("No live guest mic track for recording");}
 
-    // Paul audio — try all available sources in order of reliability
+    // Paul audio — use captureStream() on the audio element
+    // This is the ONLY reliable cross-browser way to capture remote audio into a recorder
     let paulAudioCaptured = false;
+    const paulAudioEl = document.getElementById('paulAudioEl');
 
-    // Source 1: re-read fresh from stored LiveKit track object
-    if(window._paulLiveKitTrack){
-      const freshTrack = window._paulLiveKitTrack.mediaStreamTrack;
-      if(freshTrack && freshTrack.readyState === 'live'){
-        audioCtx.createMediaStreamSource(new MediaStream([freshTrack])).connect(dest);
-        console.log('Paul audio from LiveKit track ✓', freshTrack.label);
-        paulAudioCaptured = true;
-      }
-    }
-
-    // Source 2: fallback to the audio element's srcObject
-    if(!paulAudioCaptured){
-      const paulAudioEl = document.getElementById('paulAudioEl');
-      if(paulAudioEl && paulAudioEl.srcObject){
-        const aeTracks = paulAudioEl.srcObject.getAudioTracks();
-        if(aeTracks.length > 0 && aeTracks[0].readyState === 'live'){
-          audioCtx.createMediaStreamSource(paulAudioEl.srcObject).connect(dest);
-          console.log('Paul audio from audio element srcObject ✓');
+    // Method 1: captureStream() on the audio element (Chrome/Edge — most reliable)
+    if(paulAudioEl && typeof paulAudioEl.captureStream === 'function'){
+      try{
+        const captured = paulAudioEl.captureStream();
+        const capTracks = captured.getAudioTracks();
+        if(capTracks.length > 0){
+          audioCtx.createMediaStreamSource(captured).connect(dest);
+          console.log('Paul audio via captureStream() ✓');
           paulAudioCaptured = true;
         }
-      }
+      }catch(e){ console.warn('captureStream() failed:', e); }
+    }
+
+    // Method 2: mozCaptureStream() for Firefox
+    if(!paulAudioCaptured && paulAudioEl && typeof paulAudioEl.mozCaptureStream === 'function'){
+      try{
+        const captured = paulAudioEl.mozCaptureStream();
+        const capTracks = captured.getAudioTracks();
+        if(capTracks.length > 0){
+          audioCtx.createMediaStreamSource(captured).connect(dest);
+          console.log('Paul audio via mozCaptureStream() ✓');
+          paulAudioCaptured = true;
+        }
+      }catch(e){ console.warn('mozCaptureStream() failed:', e); }
+    }
+
+    // Method 3: srcObject tracks (last resort)
+    if(!paulAudioCaptured && paulAudioEl && paulAudioEl.srcObject){
+      try{
+        const tracks = paulAudioEl.srcObject.getAudioTracks();
+        if(tracks.length > 0 && tracks[0].readyState === 'live'){
+          audioCtx.createMediaStreamSource(paulAudioEl.srcObject).connect(dest);
+          console.log('Paul audio via srcObject tracks ✓');
+          paulAudioCaptured = true;
+        }
+      }catch(e){ console.warn('srcObject method failed:', e); }
     }
 
     if(!paulAudioCaptured){
-      console.warn('⚠️ Paul audio not captured in recording — avatar voice will be missing');
+      console.warn('⚠️ Paul audio NOT captured — all methods failed');
     }
 
     const combined=new MediaStream([
