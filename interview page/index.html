@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <title>WALLIE | FairlyEven Hospitality Podcast</title>
+  <title>Paul | FairlyEven Hospitality Podcast</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     html,body{height:100%;overflow:hidden;background:#020b12;color:#fff;font-family:'DM Sans',sans-serif}
@@ -45,7 +45,7 @@
       min-height:0;
     }
     .video-box video{width:100%;height:100%;display:block;object-fit:cover}
-    #wallieVideo{object-fit:contain;background:#0a1520}
+    #paulVideo{object-fit:contain;background:#0a1520}
     #guestVideo{object-fit:cover;transform:scaleX(-1)}
     .vid-label{position:absolute;bottom:6px;left:6px;background:rgba(2,11,18,.85);border:1px solid rgba(0,212,255,.25);border-radius:7px;padding:2px 7px;font-size:10px;color:#00d4ff;backdrop-filter:blur(8px)}
     .loading-overlay{position:absolute;inset:0;background:rgba(2,11,18,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .5s;z-index:2}
@@ -112,17 +112,17 @@
 <div class="shell">
   <div class="header">
     <div class="logo">FairlyEven Hospitality Podcast</div>
-    <h1>🎙️ Live with WALLIE</h1>
+    <h1>🎙️ Live with Paul</h1>
     <a href="https://waveclosers.com" target="_blank" style="font-size:11px;color:rgba(0,212,255,0.7);text-decoration:none;letter-spacing:1px">🌊 waveclosers.com</a>
   </div>
   <div class="status-pill">
     <div class="status-dot idle" id="statusDot"></div>
-    <span id="statusText">Connecting to WALLIE...</span>
+    <span id="statusText">Connecting to Paul...</span>
   </div>
   <div class="video-row">
     <div class="video-box">
-      <video id="wallieVideo" autoplay playsinline></video>
-      <div class="vid-label">🎙️ WALLIE</div>
+      <video id="paulVideo" autoplay playsinline></video>
+      <div class="vid-label">🎙️ Paul</div>
       <div class="speaking-bars" id="speakingBars">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
@@ -169,9 +169,9 @@ const RECORDING_WEBHOOK = 'https://n8n.srv1144276.hstgr.cloud/webhook/wallie-rec
 
 let room=null, guestStream=null, mediaRecorder=null;
 let recordedChunks=[], isMuted=false, isCamOff=false, canvasRaf=null;
-let wallieAudioTrack=null; // raw MediaStreamTrack for recording mix
+let paulAudioTrack=null; // raw MediaStreamTrack for recording mix
 
-const wallieVideo   =document.getElementById('wallieVideo');
+const paulVideo   =document.getElementById('paulVideo');
 const guestVideo    =document.getElementById('guestVideo');
 const loadingOverlay=document.getElementById('loadingOverlay');
 const loadingText   =document.getElementById('loadingText');
@@ -215,7 +215,7 @@ async function initCamera(){
 
 // ── Step 2: connect LiveKit ───────────────────────────────────────────────────
 async function initLiveKit(){
-  setLoading('Loading WALLIE...',20);
+  setLoading('Loading Paul...',20);
   if(!LIVEKIT_URL||!LIVEKIT_TOKEN){
     setLoading('Missing credentials. Please use the link from your SMS.',0);
     setStatus('idle','Missing credentials');return;
@@ -231,34 +231,34 @@ async function initLiveKit(){
       audioCaptureDefaults:{autoGainControl:true,echoCancellation:true,noiseSuppression:true},
     });
 
-    // ── WALLIE video ──
+    // ── Paul video ──
     room.on(RoomEvent.TrackSubscribed,(track)=>{
       if(track.kind===Track.Kind.Video){
-        track.attach(wallieVideo);
-        setLoading('WALLIE is ready!',100);
+        track.attach(paulVideo);
+        setLoading('Paul is ready!',100);
         setTimeout(()=>{
           loadingOverlay.classList.add('hidden');
-          // Auto-start recording and enable controls as soon as WALLIE appears
+          // Auto-start recording and enable controls as soon as Paul appears
           btnMute.disabled=false; btnCam.disabled=false; btnEnd.disabled=false;
           setStatus('recording','Interview live — recording 🔴');
           startRecording();
         }, 800);
-        console.log('WALLIE video attached — auto-starting recording ✓');
+        console.log('Paul video attached — auto-starting recording ✓');
       }
 
       if(track.kind===Track.Kind.Audio){
         // Save raw track for recording
-        wallieAudioTrack=track.mediaStreamTrack;
+        paulAudioTrack=track.mediaStreamTrack;
 
         // MOST RELIABLE audio playback across browsers:
         // Create a dedicated audio element, append to body, attach track
         const audioEl=document.createElement('audio');
-        audioEl.id='wallieAudioEl';
+        audioEl.id='paulAudioEl';
         audioEl.autoplay=true;
         audioEl.style.display='none';
         document.body.appendChild(audioEl);
         track.attach(audioEl); // LiveKit handles srcObject assignment
-        console.log('WALLIE audio attached via LiveKit track.attach() ✓');
+        console.log('Paul audio attached via LiveKit track.attach() ✓');
       }
     });
 
@@ -268,7 +268,7 @@ async function initLiveKit(){
     room.on(RoomEvent.Disconnected,()=>setStatus('idle','Disconnected'));
     room.on(RoomEvent.ConnectionStateChanged,(state)=>{
       if(state==='connecting')setLoading('Joining room...',60);
-      if(state==='connected') setLoading('Waiting for WALLIE...',80);
+      if(state==='connected') setLoading('Waiting for Paul...',80);
     });
 
     setLoading('Connecting...',40);
@@ -279,7 +279,7 @@ async function initLiveKit(){
       loadingOverlay.innerHTML = `
         <div style="font-size:36px">⏱️</div>
         <div style="font-size:15px;color:#fff;text-align:center;padding:0 20px;line-height:1.6">
-          WALLIE is taking too long to connect.<br/>
+          Paul is taking too long to connect.<br/>
           <span style="color:rgba(255,255,255,.6);font-size:13px">Your session may have expired.</span>
         </div>
         <a href="https://vercel-html-zxxn.vercel.app" 
@@ -324,12 +324,12 @@ async function initLiveKit(){
 
   }catch(err){
     console.error('LiveKit error:',err);
-    setLoading('Could not connect to WALLIE. Please refresh.',0);
+    setLoading('Could not connect to Paul. Please refresh.',0);
     setStatus('idle','Connection failed');
   }
 }
 
-// ── Canvas: 1080x1920 vertical (9:16) — WALLIE top, Guest bottom ──────────────
+// ── Canvas: 1080x1920 vertical (9:16) — Paul top, Guest bottom ──────────────
 const CW=1080, CH=1920;
 const PAD=20;
 const TOP_BAR=80;      // podcast title bar at top
@@ -411,23 +411,23 @@ function drawFrame(){
   rctx.fillText('waveclosers.com', CW/2, 58);
   rctx.textAlign='left';
 
-  // ── WALLIE panel (top half) ──
-  const WALLIE_Y = TOP_BAR + PAD;
-  drawPanel(wallieVideo, PAD, WALLIE_Y, PANEL_W, PANEL_H, false);
+  // ── Paul panel (top half) ──
+  const PAUL_Y = TOP_BAR + PAD;
+  drawPanel(paulVideo, PAD, PAUL_Y, PANEL_W, PANEL_H, false);
 
-  // WALLIE name label inside panel bottom
-  const wLabelY = WALLIE_Y + PANEL_H - LABEL_H;
+  // Paul name label inside panel bottom
+  const wLabelY = PAUL_Y + PANEL_H - LABEL_H;
   const wGrad=rctx.createLinearGradient(PAD,wLabelY,PAD+PANEL_W,wLabelY);
   wGrad.addColorStop(0,'rgba(0,80,130,0.95)');wGrad.addColorStop(1,'rgba(0,40,80,0.95)');
   rctx.fillStyle=wGrad;
   rrBottom(rctx,PAD,wLabelY,PANEL_W,LABEL_H,18);rctx.fill();
   rctx.fillStyle='#fff';rctx.font='bold 28px Arial';
-  rctx.fillText('🎙️  WALLIE', PAD+20, wLabelY+32);
+  rctx.fillText('🎙️  Paul — FairlyEven Host', PAD+20, wLabelY+32);
   rctx.fillStyle='rgba(0,212,255,0.9)';rctx.font='18px Arial';
   rctx.fillText('FairlyEven Host', PAD+20, wLabelY+LABEL_H-10);
 
   // ── Guest panel (bottom half) ──
-  const GUEST_Y = WALLIE_Y + PANEL_H + DIVIDER;
+  const GUEST_Y = PAUL_Y + PANEL_H + DIVIDER;
   if(!isCamOff){
     drawPanel(guestVideo, PAD, GUEST_Y, PANEL_W, PANEL_H, true);
   } else {
@@ -481,16 +481,16 @@ function startRecording(){
       console.log("Guest mic in recording ✓",micRawTrack.label);
     }else{console.warn("No live guest mic track for recording");}
 
-    // WALLIE audio: wallieAudioTrack saved on subscribe
-    if(wallieAudioTrack && wallieAudioTrack.readyState==="live"){
-      audioCtx.createMediaStreamSource(new MediaStream([wallieAudioTrack])).connect(dest);
-      console.log("WALLIE audio in recording ✓");
+    // Paul audio: paulAudioTrack saved on subscribe
+    if(paulAudioTrack && paulAudioTrack.readyState==="live"){
+      audioCtx.createMediaStreamSource(new MediaStream([paulAudioTrack])).connect(dest);
+      console.log("Paul audio in recording ✓");
     }else{
-      const wallieAudioEl=document.getElementById("wallieAudioEl");
-      if(wallieAudioEl && wallieAudioEl.srcObject){
-        const tracks=wallieAudioEl.srcObject.getAudioTracks();
-        if(tracks.length>0){audioCtx.createMediaStreamSource(wallieAudioEl.srcObject).connect(dest);console.log("WALLIE audio fallback ✓");}
-      }else{console.warn("No WALLIE audio for recording");}
+      const paulAudioEl=document.getElementById("paulAudioEl");
+      if(paulAudioEl && paulAudioEl.srcObject){
+        const tracks=paulAudioEl.srcObject.getAudioTracks();
+        if(tracks.length>0){audioCtx.createMediaStreamSource(paulAudioEl.srcObject).connect(dest);console.log("Paul audio fallback ✓");}
+      }else{console.warn("No Paul audio for recording");}
     }
 
     const combined=new MediaStream([
