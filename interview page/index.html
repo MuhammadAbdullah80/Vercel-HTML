@@ -227,10 +227,29 @@ async function initLiveKit(){
 
     setLoading('Connecting...',40);
 
+    // Timeout — if stuck for 20s prompt user to refill form
+    const timeoutId = setTimeout(()=>{
+      if(loadingOverlay.classList.contains('hidden')) return; // already connected
+      loadingOverlay.innerHTML = `
+        <div style="font-size:36px">⏱️</div>
+        <div style="font-size:15px;color:#fff;text-align:center;padding:0 20px;line-height:1.6">
+          WALLIE is taking too long to connect.<br/>
+          <span style="color:rgba(255,255,255,.6);font-size:13px">Your session may have expired.</span>
+        </div>
+        <a href="https://vercel-html-zxxn.vercel.app" 
+           style="margin-top:8px;background:linear-gradient(135deg,#00d4ff,#0077aa);color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+          🔄 Get a New Interview Link
+        </a>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:4px">You'll receive a fresh link via SMS</div>
+      `;
+    }, 20000);
+
     // Connect WITHOUT auto-publishing — we publish the existing guestStream track manually
     await room.connect(LIVEKIT_URL, LIVEKIT_TOKEN, {
       autoSubscribe: true,
     });
+
+    clearTimeout(timeoutId);
 
     // ── Publish guest mic from the SAME guestStream already captured ──
     // This avoids double mic capture which breaks audio on many browsers
