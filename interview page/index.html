@@ -2,98 +2,158 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <title>WALLIE | FairlyEven Hospitality Podcast</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{background:#020b12;color:#fff;font-family:'DM Sans',sans-serif;min-height:100vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:20px 16px 40px}
+
+    /* Full viewport — no scroll */
+    html,body{height:100%;overflow:hidden;background:#020b12;color:#fff;font-family:'DM Sans',sans-serif}
+
     #particles{position:fixed;inset:0;z-index:0;pointer-events:none}
-    .wrapper{position:relative;z-index:1;width:100%;max-width:960px;display:flex;flex-direction:column;align-items:center;gap:14px}
-    .header{text-align:center}
-    .logo{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#00d4ff;opacity:.8;margin-bottom:4px}
-    h1{font-size:20px;font-weight:700;background:linear-gradient(135deg,#00d4ff,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .status-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:999px;padding:5px 14px;font-size:12px;color:#00d4ff}
-    .status-dot{width:7px;height:7px;border-radius:50%;background:#00d4ff;animation:pulse 2s infinite}
+
+    /* Outer shell — fills screen, flex column */
+    .shell{
+      position:relative;z-index:1;
+      height:100vh;
+      display:flex;flex-direction:column;
+      align-items:center;
+      padding:10px 12px 8px;
+      gap:8px;
+    }
+
+    /* Header */
+    .header{text-align:center;flex-shrink:0}
+    .logo{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#00d4ff;opacity:.8}
+    h1{font-size:17px;font-weight:700;background:linear-gradient(135deg,#00d4ff,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.3}
+
+    /* Status */
+    .status-pill{flex-shrink:0;display:inline-flex;align-items:center;gap:7px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:999px;padding:4px 12px;font-size:11px;color:#00d4ff}
+    .status-dot{width:6px;height:6px;border-radius:50%;background:#00d4ff;animation:pulse 2s infinite}
     .status-dot.recording{background:#ff4444}
     .status-dot.idle{background:#555;animation:none}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 
-    /* 50/50 side by side layout */
-    .video-area{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;align-items:start}
+    /* Videos row — takes remaining space */
+    .video-row{
+      flex:1;min-height:0;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      width:100%;
+      max-width:860px;
+    }
 
-    .video-box{position:relative;background:#0a1520;border-radius:16px;overflow:hidden;aspect-ratio:9/16;border:1px solid rgba(0,212,255,.15)}
+    .video-box{
+      position:relative;
+      background:#0a1520;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid rgba(0,212,255,.2);
+      height:100%;
+    }
     .video-box video{width:100%;height:100%;display:block}
     #wallieVideo{object-fit:contain;background:#0a1520}
     #guestVideo{object-fit:cover;transform:scaleX(-1)}
 
-    .vid-label{position:absolute;bottom:10px;left:10px;background:rgba(2,11,18,.8);border:1px solid rgba(0,212,255,.25);border-radius:8px;padding:3px 9px;font-size:11px;color:#00d4ff;backdrop-filter:blur(8px)}
-
-    .loading-overlay{position:absolute;inset:0;background:rgba(2,11,18,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s;z-index:2}
+    .vid-label{
+      position:absolute;bottom:8px;left:8px;
+      background:rgba(2,11,18,.85);
+      border:1px solid rgba(0,212,255,.25);
+      border-radius:7px;padding:3px 8px;
+      font-size:10px;color:#00d4ff;
+      backdrop-filter:blur(8px);
+    }
+    .loading-overlay{position:absolute;inset:0;background:rgba(2,11,18,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .5s;z-index:2}
     .loading-overlay.hidden{opacity:0;pointer-events:none}
-    .orca-emoji{font-size:40px;animation:bob 2s ease-in-out infinite}
-    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-    .loading-text{font-size:14px;color:rgba(255,255,255,.7);text-align:center;padding:0 20px}
-    .loading-bar{width:140px;height:3px;background:rgba(0,212,255,.15);border-radius:99px;overflow:hidden}
+    .orca-emoji{font-size:36px;animation:bob 2s ease-in-out infinite}
+    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+    .loading-text{font-size:13px;color:rgba(255,255,255,.7);text-align:center;padding:0 16px}
+    .loading-bar{width:120px;height:3px;background:rgba(0,212,255,.15);border-radius:99px;overflow:hidden}
     .loading-bar-fill{height:100%;width:0%;background:#00d4ff;border-radius:99px;transition:width .4s ease}
-
-    .speaking-bars{display:none;position:absolute;top:10px;right:10px;gap:3px;align-items:flex-end;height:18px;z-index:3}
+    .speaking-bars{display:none;position:absolute;top:8px;right:8px;gap:3px;align-items:flex-end;height:16px;z-index:3}
     .speaking-bars.active{display:flex}
     .bar{width:3px;background:#00d4ff;border-radius:2px;animation:barAnim .8s ease-in-out infinite}
-    .bar:nth-child(1){height:7px;animation-delay:0s}.bar:nth-child(2){height:12px;animation-delay:.1s}.bar:nth-child(3){height:18px;animation-delay:.2s}.bar:nth-child(4){height:10px;animation-delay:.3s}
+    .bar:nth-child(1){height:6px;animation-delay:0s}.bar:nth-child(2){height:11px;animation-delay:.1s}.bar:nth-child(3){height:16px;animation-delay:.2s}.bar:nth-child(4){height:9px;animation-delay:.3s}
     @keyframes barAnim{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
 
-    /* Controls row below videos */
-    .controls{display:flex;gap:8px;width:100%;flex-wrap:wrap}
-    .btn{flex:1;min-width:120px;padding:11px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+    /* Controls — always pinned at bottom, never scroll off */
+    .controls{
+      flex-shrink:0;
+      display:flex;gap:7px;
+      width:100%;max-width:860px;
+      align-items:center;
+    }
+    .btn{
+      flex:1;padding:10px 6px;border-radius:10px;border:none;
+      cursor:pointer;font-size:12px;font-weight:600;
+      transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;
+      white-space:nowrap;
+    }
     .btn:disabled{opacity:.4;cursor:not-allowed}
-    .btn-start{background:linear-gradient(135deg,#00d4ff,#0077aa);color:#fff}
-    .btn-start:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,212,255,.3)}
-    .btn-end{background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b}
-    .btn-end:hover:not(:disabled){background:rgba(255,60,60,.2)}
-    .btn-mute,.btn-cam{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
-    .btn-active{color:#ff6b6b !important;border-color:rgba(255,60,60,.4) !important}
-    .rec-badge{display:none;align-items:center;gap:6px;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.25);border-radius:8px;padding:9px 14px;font-size:12px;color:#ff6b6b;white-space:nowrap}
+    .btn-start{background:linear-gradient(135deg,#00d4ff,#0077aa);color:#fff;flex:2}
+    .btn-start:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,212,255,.3)}
+    .btn-end{background:rgba(255,60,60,.15);border:1px solid rgba(255,60,60,.35);color:#ff6b6b;flex:2}
+    .btn-end:hover:not(:disabled){background:rgba(255,60,60,.25)}
+    .btn-mute,.btn-cam{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.75);flex:1}
+    .btn-active{color:#ff6b6b !important;border-color:rgba(255,60,60,.4) !important;background:rgba(255,60,60,.08) !important}
+    .rec-badge{display:none;align-items:center;gap:5px;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.25);border-radius:8px;padding:8px 10px;font-size:11px;color:#ff6b6b;flex-shrink:0;white-space:nowrap}
     .rec-badge.visible{display:flex}
 
+    /* Hidden canvas */
     #recordCanvas{display:none}
 
+    /* Overlays */
     #uploadOverlay{display:none;position:fixed;inset:0;background:rgba(2,11,18,.95);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:20px}
     #uploadOverlay.visible{display:flex}
     .upload-spinner{width:44px;height:44px;border:3px solid rgba(0,212,255,.2);border-top-color:#00d4ff;border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .upload-text{font-size:17px;font-weight:600}.upload-sub{font-size:13px;color:rgba(255,255,255,.5);text-align:center;max-width:300px}
+    .upload-text{font-size:17px;font-weight:600}.upload-sub{font-size:13px;color:rgba(255,255,255,.5);text-align:center;max-width:280px}
     #doneScreen{display:none;position:fixed;inset:0;background:rgba(2,11,18,.97);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px}
     #doneScreen.visible{display:flex}
-    .done-emoji{font-size:56px}.done-title{font-size:26px;font-weight:700}.done-sub{font-size:14px;color:rgba(255,255,255,.5);max-width:340px;line-height:1.6}
+    .done-emoji{font-size:52px}.done-title{font-size:24px;font-weight:700}.done-sub{font-size:13px;color:rgba(255,255,255,.5);max-width:320px;line-height:1.6}
 
-    @media(max-width:580px){
-      .video-area{grid-template-columns:1fr 1fr;gap:8px}
-      .controls{gap:6px}
-      .btn{min-width:80px;font-size:12px;padding:9px 6px}
+    /* Mobile — stack videos vertically */
+    @media(max-width:520px){
+      .shell{padding:8px 8px 6px;gap:6px}
+      h1{font-size:15px}
+      .video-row{
+        grid-template-columns:1fr 1fr;
+        gap:6px;
+      }
+      .btn{font-size:11px;padding:9px 4px}
+      .btn-start,.btn-end{flex:2}
+      .btn-mute,.btn-cam{flex:1}
+    }
+
+    /* Very small screens — stack videos */
+    @media(max-width:360px){
+      .video-row{grid-template-columns:1fr}
+      .video-box{height:160px}
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
 <canvas id="particles"></canvas>
-<!-- Hidden canvas for composite recording: 1280x720, two 640px panels side by side -->
 <canvas id="recordCanvas" width="1280" height="720"></canvas>
 
-<div class="wrapper">
+<div class="shell">
   <div class="header">
     <div class="logo">FairlyEven Hospitality Podcast</div>
     <h1>🎙️ Live with WALLIE</h1>
   </div>
+
   <div class="status-pill">
     <div class="status-dot idle" id="statusDot"></div>
     <span id="statusText">Connecting to WALLIE...</span>
   </div>
 
-  <div class="video-area">
+  <div class="video-row">
     <!-- WALLIE -->
     <div class="video-box">
       <video id="wallieVideo" autoplay playsinline></video>
-      <div class="vid-label">🎙️ WALLIE — Host</div>
+      <div class="vid-label">🎙️ WALLIE</div>
       <div class="speaking-bars" id="speakingBars">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
@@ -110,11 +170,12 @@
     </div>
   </div>
 
+  <!-- Controls always pinned at bottom -->
   <div class="controls">
     <button class="btn btn-start" id="btnStart" disabled>🎙️ Start Interview</button>
     <button class="btn btn-mute"  id="btnMute"  disabled>🔇 Mute</button>
-    <button class="btn btn-cam"   id="btnCam"   disabled>📷 Hide Cam</button>
-    <button class="btn btn-end"   id="btnEnd"   disabled>⏹ End Interview</button>
+    <button class="btn btn-cam"   id="btnCam"   disabled>📷 Cam</button>
+    <button class="btn btn-end"   id="btnEnd"   disabled>⏹ End</button>
     <div class="rec-badge" id="recBadge"><div class="status-dot recording"></div> REC</div>
   </div>
 </div>
@@ -142,89 +203,71 @@ const DATE_SAFE     = p.get('date')       || new Date().toISOString().split('T')
 const RECORDING_WEBHOOK = 'https://n8n.srv1144276.hstgr.cloud/webhook/wallie-recording-upload';
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
-let room=null, guestStream=null, mediaRecorder=null;
-let recordedChunks=[], isMuted=false, isCamOff=false, canvasRaf=null;
-let wallieAudioTrack=null; // raw MediaStreamTrack from LiveKit — used for recording AND playback
+let room=null,guestStream=null,mediaRecorder=null;
+let recordedChunks=[],isMuted=false,isCamOff=false,canvasRaf=null;
+let wallieAudioTrack=null;
 
 // ─── ELEMENTS ────────────────────────────────────────────────────────────────
-const wallieVideo   = document.getElementById('wallieVideo');
-const guestVideo    = document.getElementById('guestVideo');
-const loadingOverlay= document.getElementById('loadingOverlay');
-const loadingText   = document.getElementById('loadingText');
-const loadingFill   = document.getElementById('loadingFill');
-const statusDot     = document.getElementById('statusDot');
-const statusText_el = document.getElementById('statusText');
-const speakingBars  = document.getElementById('speakingBars');
-const btnStart      = document.getElementById('btnStart');
-const btnMute       = document.getElementById('btnMute');
-const btnCam        = document.getElementById('btnCam');
-const btnEnd        = document.getElementById('btnEnd');
-const recBadge      = document.getElementById('recBadge');
-const guestLabel    = document.getElementById('guestLabel');
-const uploadOverlay = document.getElementById('uploadOverlay');
-const doneScreen    = document.getElementById('doneScreen');
-const recordCanvas  = document.getElementById('recordCanvas');
-const rctx          = recordCanvas.getContext('2d');
+const wallieVideo   =document.getElementById('wallieVideo');
+const guestVideo    =document.getElementById('guestVideo');
+const loadingOverlay=document.getElementById('loadingOverlay');
+const loadingText   =document.getElementById('loadingText');
+const loadingFill   =document.getElementById('loadingFill');
+const statusDot     =document.getElementById('statusDot');
+const statusEl      =document.getElementById('statusText');
+const speakingBars  =document.getElementById('speakingBars');
+const btnStart      =document.getElementById('btnStart');
+const btnMute       =document.getElementById('btnMute');
+const btnCam        =document.getElementById('btnCam');
+const btnEnd        =document.getElementById('btnEnd');
+const recBadge      =document.getElementById('recBadge');
+const guestLabel    =document.getElementById('guestLabel');
+const uploadOverlay =document.getElementById('uploadOverlay');
+const doneScreen    =document.getElementById('doneScreen');
+const recordCanvas  =document.getElementById('recordCanvas');
+const rctx          =recordCanvas.getContext('2d');
 
-function setStatus(dot,text){statusDot.className='status-dot '+dot;statusText_el.textContent=text;}
+function setStatus(dot,text){statusDot.className='status-dot '+dot;statusEl.textContent=text;}
 function setLoading(text,pct){loadingText.textContent=text;loadingFill.style.width=pct+'%';}
 guestLabel.textContent=GUEST_NAME.split(' ')[0]||'You';
 
 // ─── PARTICLES ───────────────────────────────────────────────────────────────
 (function(){
   const c=document.getElementById('particles'),ctx=c.getContext('2d');let W,H;
-  const pts=Array.from({length:50},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.5,dx:(Math.random()-.5)*.3,dy:(Math.random()-.5)*.3,o:Math.random()*.4+.1}));
+  const pts=Array.from({length:50},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.5,dx:(Math.random()-.5)*.3,dy:(Math.random()-.5)*.3,o:Math.random()*.35+.08}));
   function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}resize();window.addEventListener('resize',resize);
   (function draw(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(0,212,255,${p.o})`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>W)p.dx*=-1;if(p.y<0||p.y>H)p.dy*=-1;});requestAnimationFrame(draw);})();
 })();
 
 // ─── CAMERA ──────────────────────────────────────────────────────────────────
 async function initCamera(){
-  try{
-    guestStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-    guestVideo.srcObject=guestStream;
-  }catch(e){
-    try{guestStream=await navigator.mediaDevices.getUserMedia({video:false,audio:true});}
-    catch(e2){console.warn('No media:',e2);}
-  }
+  try{guestStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});guestVideo.srcObject=guestStream;}
+  catch(e){try{guestStream=await navigator.mediaDevices.getUserMedia({video:false,audio:true});}catch(e2){console.warn('No media:',e2);}}
 }
 
 // ─── LIVEKIT ─────────────────────────────────────────────────────────────────
 async function initLiveKit(){
   setLoading('Loading WALLIE...',20);
-  if(!LIVEKIT_URL||!LIVEKIT_TOKEN){
-    setLoading('Missing credentials. Please use the link from your SMS.',0);
-    setStatus('idle','Missing credentials');return;
-  }
+  if(!LIVEKIT_URL||!LIVEKIT_TOKEN){setLoading('Missing credentials. Please use the link from your SMS.',0);setStatus('idle','Missing credentials');return;}
   try{
-    const {Room,RoomEvent,Track,createLocalAudioTrack}=window.LivekitClient;
+    const{Room,RoomEvent,Track,createLocalAudioTrack}=window.LivekitClient;
     room=new Room({adaptiveStream:true,dynacast:true});
 
     room.on(RoomEvent.TrackSubscribed,(track)=>{
       if(track.kind===Track.Kind.Video){
-        // Attach WALLIE video to element
         track.attach(wallieVideo);
         setLoading('WALLIE is ready!',100);
         setTimeout(()=>loadingOverlay.classList.add('hidden'),600);
         setStatus('','Ready — click Start Interview');
         btnStart.disabled=false;
       }
-
       if(track.kind===Track.Kind.Audio){
-        // Store raw track for recording mix
-        wallieAudioTrack = track.mediaStreamTrack;
-
-        // Play WALLIE audio directly via a new Audio element
-        // (avoids srcObject autoplay issues across browsers)
-        const audioEl = new Audio();
-        audioEl.autoplay = true;
-        audioEl.srcObject = new MediaStream([track.mediaStreamTrack]);
-        audioEl.play().catch(e => {
-          console.warn('Autoplay blocked — waiting for user gesture');
-          // Retry on first user click
-          document.addEventListener('click', () => audioEl.play(), {once:true});
-        });
-        console.log('WALLIE audio track attached ✓');
+        wallieAudioTrack=track.mediaStreamTrack;
+        const audioEl=new Audio();
+        audioEl.autoplay=true;
+        audioEl.srcObject=new MediaStream([track.mediaStreamTrack]);
+        audioEl.play().catch(()=>document.addEventListener('click',()=>audioEl.play(),{once:true}));
+        console.log('WALLIE audio attached ✓');
       }
     });
 
@@ -233,137 +276,175 @@ async function initLiveKit(){
     });
     room.on(RoomEvent.Disconnected,()=>setStatus('idle','Disconnected'));
     room.on(RoomEvent.ConnectionStateChanged,(state)=>{
-      if(state==='connecting') setLoading('Joining room...',60);
-      if(state==='connected')  setLoading('Waiting for WALLIE...',80);
+      if(state==='connecting')setLoading('Joining room...',60);
+      if(state==='connected') setLoading('Waiting for WALLIE...',80);
     });
 
     setLoading('Connecting...',40);
     await room.connect(LIVEKIT_URL,LIVEKIT_TOKEN);
 
-    // Publish guest mic using createLocalAudioTrack
     try{
-      const audioTrack=await createLocalAudioTrack({echoCancellation:true,noiseSuppression:true,autoGainControl:true});
-      await room.localParticipant.publishTrack(audioTrack);
+      const aTrack=await createLocalAudioTrack({echoCancellation:true,noiseSuppression:true,autoGainControl:true});
+      await room.localParticipant.publishTrack(aTrack);
       console.log('Guest mic published ✓');
-    }catch(audioErr){
-      console.warn('Mic publish failed:',audioErr);
-    }
+    }catch(e){console.warn('Mic publish failed:',e);}
 
   }catch(err){
     console.error('LiveKit error:',err);
-    setLoading('Could not connect to WALLIE. Please refresh or contact support.',0);
+    setLoading('Could not connect to WALLIE. Please refresh.',0);
     setStatus('idle','Connection failed');
   }
 }
 
-// ─── CANVAS COMPOSITE (50/50 side by side) ───────────────────────────────────
-// Canvas is 1280x720 — WALLIE on left 640px, Guest on right 640px
-const CW=1280, CH=720, HALF=640;
+// ─── CANVAS RECORDING (50/50 with branded design) ────────────────────────────
+const CW=1280,CH=720,HALF=640;
+
+// Preload logo
+const logoImg=new Image();
+logoImg.src='https://fairlyeven.com/favicon.ico'; // fallback — won't break if 404
 
 function drawFrame(){
-  rctx.fillStyle='#0a1520';
+  // ── Background gradient ──
+  const bg=rctx.createLinearGradient(0,0,CW,CH);
+  bg.addColorStop(0,'#020b12');
+  bg.addColorStop(1,'#051825');
+  rctx.fillStyle=bg;
   rctx.fillRect(0,0,CW,CH);
 
-  // ── LEFT: WALLIE (contain fit within 640x720) ──
-  if(wallieVideo.readyState>=2 && wallieVideo.videoWidth>0){
-    const vw=wallieVideo.videoWidth, vh=wallieVideo.videoHeight;
-    const scale=Math.min(HALF/vw, CH/vh);
-    const dw=vw*scale, dh=vh*scale;
-    const dx=(HALF-dw)/2, dy=(CH-dh)/2;
-    rctx.drawImage(wallieVideo, dx, dy, dw, dh);
+  // ── Subtle grid pattern on black areas ──
+  rctx.strokeStyle='rgba(0,212,255,0.04)';
+  rctx.lineWidth=1;
+  for(let x=0;x<CW;x+=40){rctx.beginPath();rctx.moveTo(x,0);rctx.lineTo(x,CH);rctx.stroke();}
+  for(let y=0;y<CH;y+=40){rctx.beginPath();rctx.moveTo(0,y);rctx.lineTo(CW,y);rctx.stroke();}
+
+  const PAD=20, VW=HALF-PAD*2, VH=CH-100;
+  const TOP=50;
+
+  // ── WALLIE panel (left) ──
+  // Card background
+  rctx.fillStyle='rgba(10,21,32,0.9)';
+  roundRect(rctx,PAD,TOP,VW,VH,12);rctx.fill();
+  // Cyan border
+  rctx.strokeStyle='rgba(0,212,255,0.5)';
+  rctx.lineWidth=2;
+  roundRect(rctx,PAD,TOP,VW,VH,12);rctx.stroke();
+
+  if(wallieVideo.readyState>=2&&wallieVideo.videoWidth>0){
+    const vw=wallieVideo.videoWidth,vh=wallieVideo.videoHeight;
+    const scale=Math.min(VW/vw,VH/vh);
+    const dw=vw*scale,dh=vh*scale;
+    const dx=PAD+(VW-dw)/2,dy=TOP+(VH-dh)/2;
+    // Clip to card
+    rctx.save();
+    roundRect(rctx,PAD,TOP,VW,VH,12);rctx.clip();
+    rctx.drawImage(wallieVideo,dx,dy,dw,dh);
+    rctx.restore();
   }
 
-  // Center divider line
-  rctx.strokeStyle='rgba(0,212,255,0.3)';
-  rctx.lineWidth=1;
-  rctx.beginPath();rctx.moveTo(HALF,0);rctx.lineTo(HALF,CH);rctx.stroke();
+  // ── GUEST panel (right) ──
+  const GX=HALF+PAD;
+  rctx.fillStyle='rgba(10,21,32,0.9)';
+  roundRect(rctx,GX,TOP,VW,VH,12);rctx.fill();
+  rctx.strokeStyle='rgba(0,212,255,0.35)';
+  rctx.lineWidth=2;
+  roundRect(rctx,GX,TOP,VW,VH,12);rctx.stroke();
 
-  // ── RIGHT: Guest (cover fit within 640x720, mirrored) ──
-  if(guestVideo.readyState>=2 && guestVideo.videoWidth>0 && !isCamOff){
-    const gw=guestVideo.videoWidth, gh=guestVideo.videoHeight;
-    // Cover fit
-    const scale=Math.max(HALF/gw, CH/gh);
-    const dw=gw*scale, dh=gh*scale;
-    const sx=(dw-HALF)/2, sy=(dh-CH)/2;
-
+  if(guestVideo.readyState>=2&&guestVideo.videoWidth>0&&!isCamOff){
+    const gw=guestVideo.videoWidth,gh=guestVideo.videoHeight;
+    const scale=Math.max(VW/gw,VH/gh);
+    const sw=VW/scale,sh=VH/scale;
+    const sx=(gw-sw)/2,sy=(gh-sh)/2;
     rctx.save();
-    // Mirror guest video (flip within right half)
-    rctx.translate(CW, 0);   // move to far right
-    rctx.scale(-1, 1);       // flip horizontally — now drawing from right to left
-    // Draw into the right half (which after flip starts at x=0, maps to x=CW)
-    rctx.drawImage(guestVideo,
-      sx/scale, sy/scale, HALF/scale, CH/scale,  // source crop
-      0, 0, HALF, CH                              // dest: left half of flipped canvas = right half of real canvas
-    );
+    roundRect(rctx,GX,TOP,VW,VH,12);rctx.clip();
+    // Mirror guest
+    rctx.translate(GX+VW,TOP);rctx.scale(-1,1);
+    rctx.drawImage(guestVideo,sx,sy,sw,sh,0,0,VW,VH);
     rctx.restore();
   } else if(isCamOff){
-    // Camera off placeholder
-    rctx.fillStyle='#111';
-    rctx.fillRect(HALF,0,HALF,CH);
-    rctx.fillStyle='rgba(255,255,255,0.3)';
-    rctx.font='48px Arial';rctx.textAlign='center';
-    rctx.fillText('📷',HALF+HALF/2,CH/2-10);
-    rctx.font='16px Arial';
-    rctx.fillText('Camera off',HALF+HALF/2,CH/2+30);
+    rctx.fillStyle='rgba(255,255,255,0.15)';
+    rctx.font='40px Arial';rctx.textAlign='center';
+    rctx.fillText('📷',GX+VW/2,TOP+VH/2+14);
+    rctx.font='14px Arial';rctx.fillStyle='rgba(255,255,255,0.4)';
+    rctx.fillText('Camera off',GX+VW/2,TOP+VH/2+40);
     rctx.textAlign='left';
   }
 
-  // Name labels at bottom
-  rctx.fillStyle='rgba(2,11,18,0.65)';
-  rctx.fillRect(0, CH-36, HALF, 36);
-  rctx.fillRect(HALF, CH-36, HALF, 36);
-
-  rctx.fillStyle='#fff';
+  // ── Top bar — podcast title ──
+  rctx.fillStyle='rgba(2,11,18,0.85)';
+  rctx.fillRect(0,0,CW,TOP);
+  // Title text centered
+  rctx.fillStyle='#00d4ff';
   rctx.font='bold 15px Arial, sans-serif';
-  rctx.fillText('WALLIE — FairlyEven Host', 14, CH-12);
-  rctx.fillText(GUEST_NAME, HALF+14, CH-12);
+  rctx.textAlign='center';
+  rctx.fillText('FAIRLYEVEN HOSPITALITY PODCAST', CW/2, 33);
+  rctx.textAlign='left';
+
+  // ── Bottom name bars ──
+  const LABEL_H=36;
+  const LY=TOP+VH;
+
+  // WALLIE name bar
+  const wallieGrad=rctx.createLinearGradient(PAD,LY,PAD+VW,LY);
+  wallieGrad.addColorStop(0,'rgba(0,80,120,0.95)');
+  wallieGrad.addColorStop(1,'rgba(0,40,70,0.95)');
+  rctx.fillStyle=wallieGrad;
+  roundRectBottom(rctx,PAD,LY,VW,LABEL_H,12);rctx.fill();
+  rctx.fillStyle='#fff';
+  rctx.font='bold 14px Arial, sans-serif';
+  rctx.fillText('🎙️  WALLIE — FairlyEven Host', PAD+12, LY+23);
+
+  // Guest name bar
+  const guestGrad=rctx.createLinearGradient(GX,LY,GX+VW,LY);
+  guestGrad.addColorStop(0,'rgba(0,50,80,0.95)');
+  guestGrad.addColorStop(1,'rgba(0,30,55,0.95)');
+  rctx.fillStyle=guestGrad;
+  roundRectBottom(rctx,GX,LY,VW,LABEL_H,12);rctx.fill();
+  rctx.fillStyle='#fff';
+  rctx.font='bold 14px Arial, sans-serif';
+  rctx.fillText('👤  '+GUEST_NAME, GX+12, LY+23);
 
   canvasRaf=requestAnimationFrame(drawFrame);
 }
 
-function stopCanvas(){
-  if(canvasRaf){cancelAnimationFrame(canvasRaf);canvasRaf=null;}
+// Helper: full rounded rect
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
 }
+// Helper: only bottom corners rounded
+function roundRectBottom(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y);ctx.closePath();
+}
+
+function stopCanvas(){if(canvasRaf){cancelAnimationFrame(canvasRaf);canvasRaf=null;}}
 
 // ─── RECORDING ───────────────────────────────────────────────────────────────
 function startRecording(){
   try{
-    drawFrame(); // start canvas loop
-
+    drawFrame();
     const audioCtx=new AudioContext();
     const dest=audioCtx.createMediaStreamDestination();
-
-    // Mix guest mic
-    if(guestStream && guestStream.getAudioTracks().length>0){
+    if(guestStream&&guestStream.getAudioTracks().length>0)
       audioCtx.createMediaStreamSource(guestStream).connect(dest);
-    }
-    // Mix WALLIE audio — use raw MediaStreamTrack stored on subscribe
     if(wallieAudioTrack){
-      const wallieStream=new MediaStream([wallieAudioTrack]);
-      audioCtx.createMediaStreamSource(wallieStream).connect(dest);
-      console.log('WALLIE audio mixed into recording ✓');
-    } else {
-      console.warn('No WALLIE audio track yet — recording may be silent on WALLIE side');
+      audioCtx.createMediaStreamSource(new MediaStream([wallieAudioTrack])).connect(dest);
+      console.log('WALLIE audio in recording ✓');
     }
-
-    const canvasStream=recordCanvas.captureStream(30);
     const combined=new MediaStream([
-      ...canvasStream.getVideoTracks(),
+      ...recordCanvas.captureStream(30).getVideoTracks(),
       ...dest.stream.getAudioTracks()
     ]);
-
     recordedChunks=[];
-    const mimeType=MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
-      ?'video/webm;codecs=vp8,opus':'video/webm';
-    mediaRecorder=new MediaRecorder(combined,{mimeType});
-    mediaRecorder.ondataavailable=e=>{if(e.data.size>0) recordedChunks.push(e.data);};
+    const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')?'video/webm;codecs=vp8,opus':'video/webm';
+    mediaRecorder=new MediaRecorder(combined,{mimeType:mime});
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);};
     mediaRecorder.start(1000);
     recBadge.classList.add('visible');
     console.log('Recording started ✓');
-  }catch(err){
-    console.error('Recording error:',err);
-    stopCanvas();
-  }
+  }catch(err){console.error('Recording error:',err);stopCanvas();}
 }
 
 function stopRecording(){
@@ -371,8 +452,7 @@ function stopRecording(){
   return new Promise(resolve=>{
     if(!mediaRecorder||mediaRecorder.state==='inactive'){resolve(null);return;}
     mediaRecorder.onstop=()=>resolve(new Blob(recordedChunks,{type:'video/webm'}));
-    mediaRecorder.stop();
-    recBadge.classList.remove('visible');
+    mediaRecorder.stop();recBadge.classList.remove('visible');
   });
 }
 
@@ -380,13 +460,10 @@ async function uploadRecording(blob){
   uploadOverlay.classList.add('visible');
   const filename=`${PHONE_SAFE}_${DATE_SAFE}_wallie.webm`;
   const fd=new FormData();
-  fd.append('recording',blob,filename);
-  fd.append('phone_safe',PHONE_SAFE);
-  fd.append('date',DATE_SAFE);
-  fd.append('guest_name',GUEST_NAME);
-  fd.append('filename',filename);
+  fd.append('recording',blob,filename);fd.append('phone_safe',PHONE_SAFE);
+  fd.append('date',DATE_SAFE);fd.append('guest_name',GUEST_NAME);fd.append('filename',filename);
   try{await fetch(RECORDING_WEBHOOK,{method:'POST',body:fd});}
-  catch(err){console.error('Upload failed:',err);}
+  catch(e){console.error('Upload failed:',e);}
   uploadOverlay.classList.remove('visible');
   doneScreen.classList.add('visible');
 }
@@ -394,42 +471,36 @@ async function uploadRecording(blob){
 // ─── BUTTONS ─────────────────────────────────────────────────────────────────
 btnStart.addEventListener('click',()=>{
   btnStart.disabled=true;btnMute.disabled=false;btnCam.disabled=false;btnEnd.disabled=false;
-  setStatus('','Interview live 🎙️');
-  startRecording();
+  setStatus('','Interview live 🎙️');startRecording();
 });
-
 btnMute.addEventListener('click',()=>{
   isMuted=!isMuted;
-  if(guestStream) guestStream.getAudioTracks().forEach(t=>t.enabled=!isMuted);
+  if(guestStream)guestStream.getAudioTracks().forEach(t=>t.enabled=!isMuted);
   btnMute.textContent=isMuted?'🔊 Unmute':'🔇 Mute';
   btnMute.classList.toggle('btn-active',isMuted);
 });
-
 btnCam.addEventListener('click',()=>{
   isCamOff=!isCamOff;
-  if(guestStream) guestStream.getVideoTracks().forEach(t=>t.enabled=!isCamOff);
+  if(guestStream)guestStream.getVideoTracks().forEach(t=>t.enabled=!isCamOff);
   guestVideo.style.opacity=isCamOff?'0':'1';
-  btnCam.textContent=isCamOff?'📷 Show Cam':'📷 Hide Cam';
+  btnCam.textContent=isCamOff?'📷 Show':'📷 Cam';
   btnCam.classList.toggle('btn-active',isCamOff);
 });
-
 btnEnd.addEventListener('click',async()=>{
   if(!confirm('End the interview? Your recording will be saved.'))return;
   btnEnd.disabled=btnStart.disabled=btnMute.disabled=btnCam.disabled=true;
   setStatus('idle','Ending session...');
   try{await room?.disconnect();}catch(e){}
-  if(guestStream) guestStream.getTracks().forEach(t=>t.stop());
+  if(guestStream)guestStream.getTracks().forEach(t=>t.stop());
   const blob=await stopRecording();
-  if(blob&&blob.size>0) await uploadRecording(blob);
+  if(blob&&blob.size>0)await uploadRecording(blob);
   else doneScreen.classList.add('visible');
 });
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 (async()=>{
-  setStatus('idle','Starting camera...');
-  setLoading('Starting camera...',10);
-  await initCamera();
-  await initLiveKit();
+  setStatus('idle','Starting camera...');setLoading('Starting camera...',10);
+  await initCamera();await initLiveKit();
 })();
 </script>
 </body>
