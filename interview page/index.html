@@ -53,6 +53,7 @@
     .orca-emoji{font-size:36px;animation:bob 2s ease-in-out infinite}
     @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
     .loading-text{font-size:13px;color:rgba(255,255,255,.7);text-align:center;padding:0 16px}
+    .debug-line{font-size:10px;color:rgba(0,212,255,.5);text-align:center;padding:0 16px;margin-top:4px;word-break:break-all;max-width:280px}
     .loading-bar{width:120px;height:3px;background:rgba(0,212,255,.15);border-radius:99px;overflow:hidden}
     .loading-bar-fill{height:100%;width:0%;background:#00d4ff;border-radius:99px;transition:width .4s ease}
     .speaking-bars{display:none;position:absolute;top:8px;right:8px;gap:3px;align-items:flex-end;height:16px;z-index:3}
@@ -129,6 +130,7 @@
         <div class="orca-emoji">🎙️</div>
         <div class="loading-text" id="loadingText">Setting up your interview...</div>
         <div class="loading-bar"><div class="loading-bar-fill" id="loadingFill"></div></div>
+        <div class="debug-line" id="debugLine"></div>
       </div>
     </div>
     <div class="video-box">
@@ -184,6 +186,8 @@ const btnCam        =document.getElementById('btnCam');
 const btnEnd        =document.getElementById('btnEnd');
 const recBadge      =document.getElementById('recBadge');
 const guestLabel    =document.getElementById('guestLabel');
+const debugLine     =document.getElementById('debugLine');
+function setDebug(msg){ if(debugLine) debugLine.textContent = msg; console.log('[DEBUG]', msg); }
 const uploadOverlay =document.getElementById('uploadOverlay');
 const doneScreen    =document.getElementById('doneScreen');
 const recordCanvas  =document.getElementById('recordCanvas');
@@ -605,6 +609,8 @@ btnEnd.addEventListener('click',async()=>{
   setLoading('Starting camera...',10);
   await initCamera();
 
+  setDebug('guest_id: ' + (GUEST_ID || 'MISSING'));
+
   // If no guest_id — show error with form link
   if(!GUEST_ID){
     setLoading('No interview link found. Please fill out the form to get your link.',0);
@@ -620,16 +626,22 @@ btnEnd.addEventListener('click',async()=>{
 
   // Fetch fresh session from n8n (creates LiveAvatar session on demand)
   setLoading('Creating your session... (this may take 10-15s)',25);
+  setDebug('Calling: ' + SESSION_WEBHOOK);
   try{
-    // 30 second timeout — n8n needs time to call LiveAvatar APIs
     const controller = new AbortController();
     const timeoutId  = setTimeout(()=> controller.abort(), 30000);
 
     const res = await fetch(
       SESSION_WEBHOOK + '?guest_id=' + encodeURIComponent(GUEST_ID),
-      { signal: controller.signal }
+      {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit',
+        signal: controller.signal
+      }
     );
     clearTimeout(timeoutId);
+    setDebug('n8n responded: HTTP ' + res.status);
 
     if(!res.ok){
       const errText = await res.text().catch(()=>'');
@@ -640,6 +652,7 @@ btnEnd.addEventListener('click',async()=>{
     try{ data = await res.json(); }
     catch(e){ throw new Error('n8n response was not JSON — check workflow is active'); }
 
+    setDebug('Got session data. livekit_url: ' + (data.livekit_url ? 'YES' : 'NO') + ' token: ' + (data.livekit_token ? 'YES' : 'NO'));
     LIVEKIT_URL   = data.livekit_url   || '';
     LIVEKIT_TOKEN = data.livekit_token || '';
     GUEST_NAME    = data.name          || 'Guest';
