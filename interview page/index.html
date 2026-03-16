@@ -619,11 +619,26 @@ btnEnd.addEventListener('click',async()=>{
   }
 
   // Fetch fresh session from n8n (creates LiveAvatar session on demand)
-  setLoading('Connecting to Paul...',20);
+  setLoading('Creating your session... (this may take 10-15s)',25);
   try{
-    const res  = await fetch(SESSION_WEBHOOK + '?guest_id=' + encodeURIComponent(GUEST_ID));
-    if(!res.ok) throw new Error('Session fetch failed: ' + res.status);
-    const data = await res.json();
+    // 30 second timeout — n8n needs time to call LiveAvatar APIs
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(()=> controller.abort(), 30000);
+
+    const res = await fetch(
+      SESSION_WEBHOOK + '?guest_id=' + encodeURIComponent(GUEST_ID),
+      { signal: controller.signal }
+    );
+    clearTimeout(timeoutId);
+
+    if(!res.ok){
+      const errText = await res.text().catch(()=>'');
+      throw new Error('n8n returned ' + res.status + ': ' + errText.substring(0,200));
+    }
+
+    let data;
+    try{ data = await res.json(); }
+    catch(e){ throw new Error('n8n response was not JSON — check workflow is active'); }
 
     LIVEKIT_URL   = data.livekit_url   || '';
     LIVEKIT_TOKEN = data.livekit_token || '';
@@ -631,25 +646,32 @@ btnEnd.addEventListener('click',async()=>{
     PHONE_SAFE    = data.phone_safe    || 'unknown';
     DATE_SAFE     = data.date          || DATE_SAFE;
 
-    // Update guest label now we have the name
     guestLabel.textContent = GUEST_NAME.split(' ')[0] || 'You';
 
     if(!LIVEKIT_URL || !LIVEKIT_TOKEN){
-      throw new Error('No LiveKit credentials in response');
+      throw new Error('Session created but missing LiveKit credentials. Response: ' + JSON.stringify(data));
     }
+
+    setLoading('Session ready! Connecting to Paul...',60);
+
   }catch(err){
     console.error('Session fetch error:', err);
-    setLoading('Could not start your interview. Please try again.',0);
+    const isTimeout = err.name === 'AbortError';
+    const msg = isTimeout
+      ? 'Connection timed out (30s). n8n workflow may not be active.'
+      : err.message;
+
     loadingOverlay.innerHTML = `
-      <div style="font-size:36px">⏱️</div>
-      <div style="font-size:15px;color:#fff;text-align:center;padding:0 20px;line-height:1.6">
-        Could not start your interview.<br/>
-        <span style="color:rgba(255,255,255,.6);font-size:13px">Please request a new link.</span>
+      <div style="font-size:36px">${isTimeout ? '⏱️' : '❌'}</div>
+      <div style="font-size:14px;color:#fff;text-align:center;padding:0 16px;line-height:1.7;max-width:300px">
+        <strong>Could not start your session</strong><br/>
+        <span style="color:rgba(255,255,255,.55);font-size:12px">${msg}</span>
       </div>
       <a href="https://vercel-html-zxxn.vercel.app"
-         style="margin-top:8px;background:linear-gradient(135deg,#00d4ff,#0077aa);color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+         style="margin-top:10px;background:linear-gradient(135deg,#00d4ff,#0077aa);color:#fff;padding:11px 22px;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px">
         🔄 Get a New Interview Link
-      </a>`;
+      </a>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:6px;text-align:center;padding:0 16px">${msg}</div>`;
     return;
   }
 
