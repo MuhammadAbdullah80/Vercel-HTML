@@ -601,8 +601,58 @@ btnEnd.addEventListener('click',async()=>{
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 (async()=>{
-  setStatus('idle','Starting camera...');setLoading('Starting camera...',10);
+  setStatus('idle','Starting camera...');
+  setLoading('Starting camera...',10);
   await initCamera();
+
+  // If no guest_id — show error with form link
+  if(!GUEST_ID){
+    setLoading('No interview link found. Please fill out the form to get your link.',0);
+    loadingOverlay.innerHTML = `
+      <div style="font-size:36px">🔗</div>
+      <div style="font-size:15px;color:#fff;text-align:center;padding:0 20px;line-height:1.6">No interview link found.</div>
+      <a href="https://vercel-html-zxxn.vercel.app"
+         style="margin-top:8px;background:linear-gradient(135deg,#00d4ff,#0077aa);color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+        📋 Sign Up for Your Interview
+      </a>`;
+    return;
+  }
+
+  // Fetch fresh session from n8n (creates LiveAvatar session on demand)
+  setLoading('Connecting to Paul...',20);
+  try{
+    const res  = await fetch(SESSION_WEBHOOK + '?guest_id=' + encodeURIComponent(GUEST_ID));
+    if(!res.ok) throw new Error('Session fetch failed: ' + res.status);
+    const data = await res.json();
+
+    LIVEKIT_URL   = data.livekit_url   || '';
+    LIVEKIT_TOKEN = data.livekit_token || '';
+    GUEST_NAME    = data.name          || 'Guest';
+    PHONE_SAFE    = data.phone_safe    || 'unknown';
+    DATE_SAFE     = data.date          || DATE_SAFE;
+
+    // Update guest label now we have the name
+    guestLabel.textContent = GUEST_NAME.split(' ')[0] || 'You';
+
+    if(!LIVEKIT_URL || !LIVEKIT_TOKEN){
+      throw new Error('No LiveKit credentials in response');
+    }
+  }catch(err){
+    console.error('Session fetch error:', err);
+    setLoading('Could not start your interview. Please try again.',0);
+    loadingOverlay.innerHTML = `
+      <div style="font-size:36px">⏱️</div>
+      <div style="font-size:15px;color:#fff;text-align:center;padding:0 20px;line-height:1.6">
+        Could not start your interview.<br/>
+        <span style="color:rgba(255,255,255,.6);font-size:13px">Please request a new link.</span>
+      </div>
+      <a href="https://vercel-html-zxxn.vercel.app"
+         style="margin-top:8px;background:linear-gradient(135deg,#00d4ff,#0077aa);color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+        🔄 Get a New Interview Link
+      </a>`;
+    return;
+  }
+
   await initLiveKit();
 })();
 </script>
