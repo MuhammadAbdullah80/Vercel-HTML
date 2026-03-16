@@ -160,13 +160,17 @@
 
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 <script>
-const p             = new URLSearchParams(window.location.search);
-const LIVEKIT_URL   = decodeURIComponent(p.get('livekit_url')   || '');
-const LIVEKIT_TOKEN = decodeURIComponent(p.get('livekit_token') || '');
-const GUEST_NAME    = decodeURIComponent(p.get('name')          || 'Guest');
-const PHONE_SAFE    = p.get('phone_safe') || 'unknown';
-const DATE_SAFE     = p.get('date')       || new Date().toISOString().split('T')[0];
+const p               = new URLSearchParams(window.location.search);
+const GUEST_ID        = p.get('guest_id') || '';
+const SESSION_WEBHOOK = 'https://n8n.srv1144276.hstgr.cloud/webhook/wallie-session-create';
 const RECORDING_WEBHOOK = 'https://n8n.srv1144276.hstgr.cloud/webhook/wallie-recording-upload';
+
+// Populated after session fetch from n8n
+let LIVEKIT_URL   = '';
+let LIVEKIT_TOKEN = '';
+let GUEST_NAME    = 'Guest';
+let PHONE_SAFE    = 'unknown';
+let DATE_SAFE     = new Date().toISOString().split('T')[0];
 
 let room=null, guestStream=null, mediaRecorder=null;
 let recordedChunks=[], isMuted=false, isCamOff=false, canvasRaf=null;
